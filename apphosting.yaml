@@ -10,3 +10,5 @@ runConfig:
       secret: FIREBASE_SERVICE_ACCOUNT_KEY
     - variable: NEXT_PUBLIC_RECAPTCHA_V3_SITE_KEY
       value: "6Leum8grAAAAANQliesqPNbXCYLd4CDEL4ZGGzhd"
+    - variable: ADMIN_BOOTSTRAP_TOKEN
+      secret: ADMIN_BOOTSTRAP_TOKEN
