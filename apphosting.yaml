@@ -12,3 +12,6 @@ runConfig:
       value: "6Leum8grAAAAANQliesqPNbXCYLd4CDEL4ZGGzhd"
     - variable: ADMIN_BOOTSTRAP_TOKEN
       secret: ADMIN_BOOTSTRAP_TOKEN
+env:
+  - variable: ADMIN_BOOTSTRAP_TOKEN
+    secret: ADMIN_BOOTSTRAP_TOKEN

@@ -1,15 +1,19 @@
 import { onRequest } from 'firebase-functions/v2/https';
-import { onDocumentUpdated, onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onDocumentUpdated, onDocumentCreated, onDocumentDeleted } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onObjectFinalized, onObjectDeleted } from 'firebase-functions/v2/storage';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import { defineSecret } from 'firebase-functions/params';
+import algoliasearch from 'algoliasearch';
 import * as admin from 'firebase-admin';
 import sharp from 'sharp';
 
 admin.initializeApp();
 setGlobalOptions({ region: 'us-central1' });
 const RESEND_API_KEY = defineSecret('RESEND_API_KEY');
+const ALGOLIA_APP_ID = defineSecret('ALGOLIA_APP_ID');
+const ALGOLIA_ADMIN_KEY = defineSecret('ALGOLIA_ADMIN_KEY');
+const ALGOLIA_INDEX_VEHICLES = defineSecret('ALGOLIA_INDEX_VEHICLES');
 
 async function sendEmail(to: string, subject: string, html: string) {
   try {
@@ -160,6 +164,46 @@ export const onBookingUpdateEmail = onDocumentUpdated({ document: 'bookings/{boo
   if (host.email) {
     await sendEmail(host.email, subject, html);
   }
+});
+
+// Algolia indexing for vehicles
+function getAlgoliaIndex() {
+  const client = algoliasearch(ALGOLIA_APP_ID.value(), ALGOLIA_ADMIN_KEY.value());
+  return client.initIndex(ALGOLIA_INDEX_VEHICLES.value() || 'vehicles');
+}
+
+function vehicleToRecord(v: any) {
+  return {
+    objectID: v.id,
+    name: v.name,
+    make: v.make,
+    model: v.model,
+    year: v.year,
+    type: v.type,
+    pricePerDay: v.pricePerDay,
+    location: v.location,
+    rating: v.rating,
+    features: v.features,
+  };
+}
+
+export const onVehicleCreateIndex = onDocumentCreated({ document: 'vehicles/{vehicleId}', secrets: [ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY, ALGOLIA_INDEX_VEHICLES] }, async (event) => {
+  const data = event.data?.data();
+  if (!data) return;
+  const index = getAlgoliaIndex();
+  await index.saveObject(vehicleToRecord({ id: event.params.vehicleId, ...data }));
+});
+
+export const onVehicleUpdateIndex = onDocumentUpdated({ document: 'vehicles/{vehicleId}', secrets: [ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY, ALGOLIA_INDEX_VEHICLES] }, async (event) => {
+  const after = event.data?.after?.data();
+  if (!after) return;
+  const index = getAlgoliaIndex();
+  await index.saveObject(vehicleToRecord({ id: event.params.vehicleId, ...after }));
+});
+
+export const onVehicleDeleteIndex = onDocumentDeleted({ document: 'vehicles/{vehicleId}', secrets: [ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY, ALGOLIA_INDEX_VEHICLES] }, async (event) => {
+  const index = getAlgoliaIndex();
+  await index.deleteObject(event.params.vehicleId);
 });
 
 // Scheduled cleanup: remove pending bookings older than 48h
