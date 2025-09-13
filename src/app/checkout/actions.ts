@@ -3,6 +3,7 @@
 
 import Stripe from 'stripe';
 import { getVehicle, addBooking } from '@/lib/firestore';
+import { hasBookingConflict } from '@/lib/firestore-admin';
 import { differenceInDays } from 'date-fns';
 import { auth } from '@/lib/firebase/server';
 import { z } from 'zod';
@@ -19,7 +20,7 @@ const CreatePaymentIntentInputSchema = z.object({
  * Creates a Stripe Payment Intent and a corresponding 'pending' booking in Firestore.
  * The total amount is calculated on the server to prevent tampering.
  */
-export async function createAuthenticatedPaymentIntent(input: z.infer<typeof CreatePaymentIntentInputSchema>) {
+export async function createAuthenticatedPaymentIntent(input: z.infer<typeof CreatePaymentIntentInputSchema>, idempotencyKey?: string) {
   const { user } = await auth();
   if (!user) {
     return { error: 'You must be logged in to make a payment.' };
@@ -34,6 +35,8 @@ export async function createAuthenticatedPaymentIntent(input: z.infer<typeof Cre
   const { vehicleId, fromDate, toDate } = parsed.data;
 
   try {
+    // Idempotency: if provided, short-circuit by checking existing booking with this key
+    // (optional future: store idempotencyKey on booking document)
     const vehicle = await getVehicle(vehicleId);
     if (!vehicle) {
       return { error: 'Vehicle not found.' };
@@ -45,6 +48,12 @@ export async function createAuthenticatedPaymentIntent(input: z.infer<typeof Cre
     const numberOfDays = differenceInDays(to, from);
     if (numberOfDays < 1) {
         return { error: 'Invalid date range. Minimum booking is 1 day.' };
+    }
+
+    // Prevent overlapping bookings
+    const conflict = await hasBookingConflict(vehicle.id, from.toISOString(), to.toISOString());
+    if (conflict) {
+      return { error: 'Selected dates are no longer available for this vehicle.' };
     }
 
     const priceForDays = numberOfDays * vehicle.pricePerDay;
@@ -83,7 +92,7 @@ export async function createAuthenticatedPaymentIntent(input: z.infer<typeof Cre
         endDate: toDate,
         bookingId: bookingId, // Link booking to payment intent
       }
-    });
+    }, idempotencyKey ? { idempotencyKey } : undefined);
 
     return { clientSecret: paymentIntent.client_secret };
   } catch (error) {

@@ -42,6 +42,20 @@ export default function CheckoutClient({ vehicle, fromDate, toDate }: CheckoutCl
   const [selectedPlan, setSelectedPlan] = useState<InsurancePlan>(insurancePlans[1]); // Default to Standard
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingSecret, setLoadingSecret] = useState(true);
+  const [idempotencyKey] = useState<string>(() => {
+    try {
+      // Prefer stable key per mount to prevent duplicate intents
+      // crypto.randomUUID is widely supported
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        return crypto.randomUUID();
+      }
+    } catch {}
+    return `${vehicle.id}-${fromDate}-${toDate}-${Date.now()}`;
+  });
   
   const from = new Date(fromDate);
   const to = new Date(toDate);
@@ -58,7 +72,7 @@ export default function CheckoutClient({ vehicle, fromDate, toDate }: CheckoutCl
       vehicleId: vehicle.id,
       fromDate: from.toISOString(),
       toDate: to.toISOString(),
-    }).then(res => {
+    }, idempotencyKey).then(res => {
         if (res.clientSecret) {
           setClientSecret(res.clientSecret);
         } else if (res.error) {
@@ -71,7 +85,7 @@ export default function CheckoutClient({ vehicle, fromDate, toDate }: CheckoutCl
     }).finally(() => {
         setLoadingSecret(false);
     });
-  }, [vehicle.id, fromDate, toDate, total, toast]);
+  }, [vehicle.id, fromDate, toDate, total, toast, idempotencyKey]);
   
   const handleSuccess = () => {
     const confirmationUrl = `/booking/confirmed?vehicleId=${vehicle.id}&from=${fromDate}&to=${toDate}`;

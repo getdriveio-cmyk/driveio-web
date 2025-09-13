@@ -57,4 +57,24 @@ export async function getVehiclesAdmin(count?: number, filters?: VehicleFilters)
   }
 }
 
+export async function hasBookingConflict(vehicleId: string, fromIso: string, toIso: string): Promise<boolean> {
+  // Find any booking for same vehicle where startDate < toIso and endDate > fromIso
+  // We query startDate < toIso, then filter endDate in memory to minimize indexes.
+  const snap = await db.collection('bookings')
+    .where('vehicle.id', '==', vehicleId)
+    .where('startDate', '<', toIso)
+    .limit(5)
+    .get();
+  for (const doc of snap.docs) {
+    const b = doc.data() as any;
+    const status = (b.status || '').toString();
+    if (status === 'cancelled' || status === 'declined') continue;
+    const existingEnd = (b.endDate || '').toString();
+    if (existingEnd > fromIso) {
+      return true;
+    }
+  }
+  return false;
+}
+
 
