@@ -1,7 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { deleteVehicle, getHost } from '@/lib/firestore';
+import { getHost } from '@/lib/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 import { auth } from '@/lib/firebase/server';
 
 export async function deleteVehicleAction(vehicleId: string) {
@@ -30,7 +31,8 @@ export async function deleteVehicleAction(vehicleId: string) {
   }
 
   try {
-    await deleteVehicle(vehicleId);
+    const db = getFirestore();
+    await db.collection('vehicles').doc(vehicleId).delete();
     revalidatePath('/admin/fleet');
     return {
       success: true,

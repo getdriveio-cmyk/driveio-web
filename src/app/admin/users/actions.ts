@@ -1,9 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { banUser, getHost } from '@/lib/firestore';
+import { getHost } from '@/lib/firestore';
 import { auth } from '@/lib/firebase/server';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 
 export async function banUserAction(userId: string, isBanned: boolean) {
   const { user } = await auth();
@@ -41,7 +42,8 @@ export async function banUserAction(userId: string, isBanned: boolean) {
   try {
     // Also update the user's disabled status in Firebase Auth
     await getAuth().updateUser(userId, { disabled: isBanned });
-    await banUser(userId, isBanned);
+    const db = getFirestore();
+    await db.collection('hosts').doc(userId).update({ isBanned });
     revalidatePath('/admin/users');
     return {
       success: true,

@@ -4,13 +4,17 @@ import sharp from 'sharp';
 
 admin.initializeApp();
 
-export const ping = functions.https.onRequest((req, res) => {
+export const ping = functions.region('us-central1').https.onRequest((req, res) => {
   res.set('Cache-Control', 'no-store');
   res.status(200).send({ ok: true, ts: new Date().toISOString() });
 });
 
 // Generate thumbnails for images uploaded under vehicles/ and avatars/
-export const generateThumbnails = functions.storage.object().onFinalize(async (object) => {
+export const generateThumbnails = functions
+  .region('us-central1')
+  .runWith({ memory: '512MB', timeoutSeconds: 120 })
+  .storage.object()
+  .onFinalize(async (object) => {
   const bucket = admin.storage().bucket(object.bucket);
   const filePath = object.name || '';
   const contentType = object.contentType || '';
@@ -36,8 +40,24 @@ export const generateThumbnails = functions.storage.object().onFinalize(async (o
   ]);
 });
 
+// Cleanup derived files when original is deleted
+export const cleanupDerived = functions
+  .region('us-central1')
+  .storage.object()
+  .onDelete(async (object) => {
+    const bucket = admin.storage().bucket(object.bucket);
+    const filePath = object.name || '';
+    const base = filePath.replace(/\.[^/.]+$/, '');
+    const webPath = `${base}_web.jpg`;
+    const thumbPath = `${base}_thumb.jpg`;
+    await Promise.allSettled([
+      bucket.file(webPath).delete({ ignoreNotFound: true }),
+      bucket.file(thumbPath).delete({ ignoreNotFound: true }),
+    ]);
+  });
+
 // Sync hosts/{uid}.isBanned -> Firebase Auth disabled flag
-export const onHostUpdate = functions.firestore.document('hosts/{userId}').onUpdate(async (change, ctx) => {
+export const onHostUpdate = functions.region('us-central1').firestore.document('hosts/{userId}').onUpdate(async (change, ctx) => {
   const before = change.before.data();
   const after = change.after.data();
   if (before?.isBanned === after?.isBanned) return;
@@ -45,7 +65,7 @@ export const onHostUpdate = functions.firestore.document('hosts/{userId}').onUpd
 });
 
 // On booking status changes, add a timestamped activity record (analytics/tracking)
-export const onBookingUpdate = functions.firestore.document('bookings/{bookingId}').onUpdate(async (change, ctx) => {
+export const onBookingUpdate = functions.region('us-central1').firestore.document('bookings/{bookingId}').onUpdate(async (change, ctx) => {
   const before = change.before.data();
   const after = change.after.data();
   if (before?.status === after?.status) return;
@@ -58,7 +78,7 @@ export const onBookingUpdate = functions.firestore.document('bookings/{bookingId
 });
 
 // Scheduled cleanup: remove pending bookings older than 48h
-export const cleanStalePending = functions.pubsub.schedule('every 24 hours').onRun(async () => {
+export const cleanStalePending = functions.region('us-central1').pubsub.schedule('every 24 hours').onRun(async () => {
   const cutoff = Date.now() - 48 * 60 * 60 * 1000;
   const snap = await admin.firestore().collection('bookings')
     .where('status', '==', 'pending')

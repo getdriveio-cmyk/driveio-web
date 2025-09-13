@@ -33,6 +33,7 @@ firebase-debug.log
 *service-account*.json
 *firebase-adminsdk*.json
 studio-*-firebase-adminsdk-*.json
+firebase-sa.json
 *.pem
 *.p12
 

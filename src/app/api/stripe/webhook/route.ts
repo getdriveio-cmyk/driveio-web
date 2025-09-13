@@ -4,6 +4,8 @@ import Stripe from 'stripe';
 import { headers } from 'next/headers';
 import { updateBookingStatus } from '@/lib/firestore';
 
+export const runtime = 'nodejs';
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 
