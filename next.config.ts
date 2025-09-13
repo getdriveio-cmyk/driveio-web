@@ -9,9 +9,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    serverComponentsExternalPackages: ['firebase-admin', 'google-auth-library', '@google-cloud/firestore', 'gaxios', 'https-proxy-agent', 'agent-base', 'gcp-metadata'],
-  },
+  serverExternalPackages: ['firebase-admin', 'google-auth-library', '@google-cloud/firestore', 'gaxios', 'https-proxy-agent', 'agent-base', 'gcp-metadata'],
   images: {
     remotePatterns: [
       {
