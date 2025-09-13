@@ -1,6 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/hosts/$(request.auth.uid)).data.isAdmin == true;
+    }
     // Hosts (Users) Collection
     match /hosts/{userId} {
       // Anyone can read a host's profile (for host profile pages)
@@ -21,6 +29,36 @@ service cloud.firestore {
 
       // Only the host who owns the vehicle can update or delete it.
       allow update, delete: if request.auth != null && request.auth.uid == resource.data.host.id;
+    }
+
+    // Bookings Collection
+    match /bookings/{bookingId} {
+      // Renter or Host can read their related bookings
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.renter.id ||
+        request.auth.uid == resource.data.vehicle.host.id
+      );
+
+      // Only the renter can create the booking document
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.renter.id;
+
+      // Only the host can update booking status; restrict updatable fields
+      allow update: if isSignedIn() &&
+        request.auth.uid == resource.data.vehicle.host.id &&
+        request.resource.data.diff(resource.data).changedKeys().hasOnly(["status", "updatedAt"]);
+
+      // Deletions not allowed by default
+      allow delete: if false;
+    }
+
+    // Contacts Collection
+    match /contacts/{contactId} {
+      // Anyone can submit the form
+      allow create: if true;
+      // Only admins can read contact entries
+      allow read: if isAdmin();
+      // No updates or deletes by default
+      allow update, delete: if false;
     }
   }
 }

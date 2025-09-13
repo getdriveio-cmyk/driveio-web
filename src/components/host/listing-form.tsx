@@ -24,6 +24,8 @@ import { carBrands } from '@/lib/car-brands';
 import type { Vehicle } from '@/lib/types';
 import { useAuth } from '@/lib/store';
 import { saveVehicleAction } from '@/app/host/actions';
+import { storage } from '@/lib/firebase';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 
 const listingFormSchema = z.object({
@@ -115,20 +117,25 @@ export default function ListingForm({ isEditMode = false, vehicleData }: Listing
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: currentYear - 2010 + 2 }, (_, i) => currentYear + 1 - i);
 
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(event.target.files || []);
-        const newPreviews: string[] = [];
-        
-        files.forEach(file => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                newPreviews.push(reader.result as string);
-                if (newPreviews.length === files.length) {
-                    setImagePreviews(prev => [...prev, ...newPreviews].slice(0, 6));
-                }
-            };
-            reader.readAsDataURL(file);
-        });
+        if (!user?.id) {
+            return toast({ variant: 'destructive', title: 'Login required', description: 'Please log in to upload photos.' });
+        }
+        if (files.length === 0) return;
+        const uploads = files.slice(0, Math.max(0, 6 - imagePreviews.length));
+        const uploadedUrls: string[] = [];
+        for (let i = 0; i < uploads.length; i++) {
+            const file = uploads[i];
+            const path = `vehicles/${user.id}/${Date.now()}_${i}_${file.name}`;
+            const objRef = storageRef(storage, path);
+            await uploadBytes(objRef, file, { contentType: file.type });
+            const url = await getDownloadURL(objRef);
+            uploadedUrls.push(url);
+        }
+        if (uploadedUrls.length > 0) {
+            setImagePreviews(prev => [...prev, ...uploadedUrls].slice(0, 6));
+        }
     };
 
     const removeImage = (index: number) => {
