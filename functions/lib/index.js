@@ -36,16 +36,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cleanStalePending = exports.onBookingUpdate = exports.onHostUpdate = exports.cleanupDerived = exports.generateThumbnails = exports.ping = void 0;
+exports.cleanStalePending = exports.onBookingUpdateEmail = exports.onBookingCreateEmail = exports.onBookingUpdate = exports.onHostUpdate = exports.cleanupDerived = exports.generateThumbnails = exports.ping = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-functions/v2/firestore");
 const scheduler_1 = require("firebase-functions/v2/scheduler");
 const storage_1 = require("firebase-functions/v2/storage");
 const v2_1 = require("firebase-functions/v2");
+const params_1 = require("firebase-functions/params");
 const admin = __importStar(require("firebase-admin"));
 const sharp_1 = __importDefault(require("sharp"));
 admin.initializeApp();
 (0, v2_1.setGlobalOptions)({ region: 'us-central1' });
+const RESEND_API_KEY = (0, params_1.defineSecret)('RESEND_API_KEY');
+async function sendEmail(to, subject, html) {
+    try {
+        const resp = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${RESEND_API_KEY.value()}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                from: 'Driveio <noreply@driveio.info>',
+                to: [to],
+                subject,
+                html,
+            }),
+        });
+        if (!resp.ok) {
+            const text = await resp.text().catch(() => '');
+            console.error('sendEmail failed', resp.status, text);
+        }
+    }
+    catch (err) {
+        console.error('sendEmail exception', err);
+    }
+}
 exports.ping = (0, https_1.onRequest)((req, res) => {
     res.set('Cache-Control', 'no-store');
     res.status(200).send({ ok: true, ts: new Date().toISOString() });
@@ -109,6 +135,54 @@ exports.onBookingUpdate = (0, firestore_1.onDocumentUpdated)('bookings/{bookingI
         to: after.status,
         at: admin.firestore.FieldValue.serverTimestamp(),
     });
+});
+// Email notifications: on booking created and on status changes
+exports.onBookingCreateEmail = (0, firestore_1.onDocumentCreated)({ document: 'bookings/{bookingId}', secrets: [RESEND_API_KEY] }, async (event) => {
+    const booking = event.data?.data();
+    if (!booking)
+        return;
+    const vehicle = booking.vehicle || {};
+    const host = vehicle.host || {};
+    const renter = booking.renter || {};
+    const start = booking.startDate;
+    const end = booking.endDate;
+    const title = vehicle.name || `${vehicle.make || ''} ${vehicle.model || ''}`.trim();
+    // Notify host about new booking request
+    if (host.email) {
+        await sendEmail(host.email, `New booking request for ${title}`, `<p>Hello ${host.name || 'Host'},</p>
+       <p>You have a new booking request for <strong>${title}</strong> from <strong>${renter.name || 'a renter'}</strong>.</p>
+       <p>Dates: ${start} to ${end}</p>
+       <p>Total: $${booking.total}</p>
+       <p>Please review and confirm in your dashboard.</p>`);
+    }
+    // Acknowledge renter
+    if (renter.email) {
+        await sendEmail(renter.email, `We received your booking request for ${title}`, `<p>Hi ${renter.name || 'there'},</p>
+       <p>Your booking request for <strong>${title}</strong> was received.</p>
+       <p>Dates: ${start} to ${end}</p>
+       <p>We will email you when the host confirms.</p>`);
+    }
+});
+exports.onBookingUpdateEmail = (0, firestore_1.onDocumentUpdated)({ document: 'bookings/{bookingId}', secrets: [RESEND_API_KEY] }, async (event) => {
+    const before = event.data?.before?.data();
+    const after = event.data?.after?.data();
+    if (!before || !after)
+        return;
+    if (before.status === after.status)
+        return;
+    const title = (after.vehicle?.name) || `${after.vehicle?.make || ''} ${after.vehicle?.model || ''}`.trim();
+    const renter = after.renter || {};
+    const host = after.vehicle?.host || {};
+    const status = after.status;
+    const subject = `Booking ${status}: ${title}`;
+    const html = `<p>Your booking for <strong>${title}</strong> is now <strong>${status}</strong>.</p>
+               <p>Dates: ${after.startDate} to ${after.endDate}</p>`;
+    if (renter.email) {
+        await sendEmail(renter.email, subject, html);
+    }
+    if (host.email) {
+        await sendEmail(host.email, subject, html);
+    }
 });
 // Scheduled cleanup: remove pending bookings older than 48h
 exports.cleanStalePending = (0, scheduler_1.onSchedule)('every 24 hours', async () => {

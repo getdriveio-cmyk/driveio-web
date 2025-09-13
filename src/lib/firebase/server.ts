@@ -1,5 +1,6 @@
 
 import { getAuth } from 'firebase-admin/auth';
+import { getAppCheck } from 'firebase-admin/app-check';
 import { cookies } from 'next/headers';
 import { nextTick } from 'process';
 import { app } from '@/lib/firebase/admin-app';
@@ -43,3 +44,13 @@ const clearSessionCookie = () => {
 };
 
 export { auth, setSessionCookie, clearSessionCookie };
+
+export async function verifyAppCheckToken(appCheckToken?: string) {
+    try {
+        if (!appCheckToken) return { valid: false };
+        const token = await getAppCheck(app).verifyToken(appCheckToken);
+        return { valid: true, token };
+    } catch (e) {
+        return { valid: false };
+    }
+}

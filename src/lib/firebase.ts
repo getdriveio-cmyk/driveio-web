@@ -4,6 +4,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from "firebase/analytics";
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -24,6 +25,18 @@ const storage = getStorage(app);
 // Initialize Analytics only on the client side
 if (typeof window !== 'undefined') {
   getAnalytics(app);
+  try {
+    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_V3_SITE_KEY as string | undefined;
+    if (siteKey) {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider(siteKey),
+        isTokenAutoRefreshEnabled: true,
+      });
+    }
+  } catch (e) {
+    // app-check init best-effort; don't crash client
+    console.warn('App Check init failed', e);
+  }
 }
 
 
