@@ -17,6 +17,7 @@ export const runtime = 'nodejs';
 import type { Vehicle } from '@/lib/types';
 import SearchCard from '@/components/search-card';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 
 export const metadata: Metadata = {
   title: 'DriveIO - Seamless Car Rentals for Every Journey',
@@ -34,7 +35,11 @@ const vehicleTypes = [
 ];
 
 export default async function Home() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/vehicles?count=4`, { cache: 'no-store' });
+  const h = headers();
+  const proto = h.get('x-forwarded-proto') || 'https';
+  const host = h.get('x-forwarded-host') || h.get('host');
+  const baseUrl = `${proto}://${host}`;
+  const res = await fetch(`${baseUrl}/api/vehicles?count=4`, { cache: 'no-store' });
   const data = await res.ok ? await res.json() : { vehicles: [] };
   const featuredVehicles: Vehicle[] = data.vehicles || [];
 
