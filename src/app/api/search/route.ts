@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getVehiclesAdmin } from '@/lib/firestore-admin';
 import { verifyAppCheckToken } from '@/lib/firebase/server';
+import { allowRequest } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -10,6 +11,11 @@ export async function POST(req: NextRequest) {
     const { valid } = await verifyAppCheckToken(appCheckToken);
     if (!valid) {
       return NextResponse.json({ error: 'App Check verification failed' }, { status: 401 });
+    }
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.ip || 'unknown';
+    const limit = await allowRequest('api_search', ip, 30);
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds || 60) } as any });
     }
     const body = await req.json().catch(() => ({}));
     const { count, ...filters } = body || {};

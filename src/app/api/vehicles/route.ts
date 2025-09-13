@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getVehiclesAdmin } from '@/lib/firestore-admin';
+import { allowRequest } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.ip || 'unknown';
+    const limit = await allowRequest('api_vehicles_get', ip, 60);
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds || 60) } as any });
+    }
     const { searchParams } = new URL(req.url);
     const countParam = searchParams.get('count');
     const count = countParam ? Number(countParam) : undefined;
