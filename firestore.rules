@@ -60,5 +60,16 @@ service cloud.firestore {
       // No updates or deletes by default
       allow update, delete: if false;
     }
+
+    // Admin audit logs - readable by admins only; writes via Admin SDK
+    match /admin_audit/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Rate limit docs - server-only
+    match /rate_limits/{docId} {
+      allow read, write: if false;
+    }
   }
 }
