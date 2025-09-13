@@ -25,7 +25,7 @@ import AiAssistant from '@/components/ai-assistant';
 import { cn } from '@/lib/utils';
 import MapView from '@/components/map-view';
 import { addDays } from 'date-fns';
-import { getFilteredVehiclesAction } from '@/app/search/actions';
+// Use API route to avoid server action cross-origin issues on App Hosting
 
 const vehicleFeatures = ['Electric', '4x4', 'Autopilot', 'Convertible'];
 const vehicleTypes = [
@@ -173,14 +173,23 @@ export default function SearchPageClient({ allVehicles }: SearchPageClientProps)
   // This is the core logic change: fetch data when filters change
   const runSearch = useCallback(() => {
     startTransition(async () => {
-        const vehicles = await getFilteredVehiclesAction({
+        const res = await fetch('/api/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             type: typeFilter,
             maxPrice: priceFilter,
             features: featuresFilter,
             minRating: ratingFilter,
             location: location,
+          })
         });
-        setFilteredVehicles(vehicles);
+        if (!res.ok) {
+          setFilteredVehicles([]);
+          return;
+        }
+        const data = await res.json();
+        setFilteredVehicles(data.vehicles || []);
     });
   }, [typeFilter, priceFilter, featuresFilter, ratingFilter, location]);
   
