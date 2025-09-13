@@ -5,6 +5,7 @@ import { auth } from '@/lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import type { AuthUser } from '@/lib/store';
 import { getUserByEmail } from '@/lib/firestore';
+import { setSessionCookie, clearSessionCookie } from '@/lib/firebase/server';
 
 export async function loginAction(prevState: any, formData: FormData) {
   const email = formData.get('email') as string;
@@ -13,6 +14,9 @@ export async function loginAction(prevState: any, formData: FormData) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    // Create a server-side session cookie so server actions can authenticate
+    const idToken = await user.getIdToken(true);
+    await setSessionCookie(idToken);
     
     // Fetch user profile from Firestore to get roles
     const userProfile = await getUserByEmail(user.email!);
@@ -57,5 +61,31 @@ export async function loginAction(prevState: any, formData: FormData) {
       success: false,
       error: errorMessage,
     };
+  }
+}
+
+// Allows client-side social login flows to establish a server session
+export async function createSessionFromIdToken(idToken: string) {
+  'use server';
+  if (!idToken) {
+    return { success: false, error: 'Missing idToken' };
+  }
+  try {
+    await setSessionCookie(idToken);
+    return { success: true };
+  } catch (error) {
+    console.error('Error creating session from ID token:', error);
+    return { success: false, error: 'Failed to create session' };
+  }
+}
+
+export async function logoutAction() {
+  'use server';
+  try {
+    clearSessionCookie();
+    return { success: true };
+  } catch (error) {
+    console.error('Error clearing session cookie:', error);
+    return { success: false };
   }
 }

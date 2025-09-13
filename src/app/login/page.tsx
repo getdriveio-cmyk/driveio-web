@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { GoogleIcon, AppleIcon } from '@/components/social-icons';
 import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
-import { loginAction } from './actions';
+import { loginAction, createSessionFromIdToken } from './actions';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/store';
 import { useRouter } from 'next/navigation';
@@ -101,6 +101,17 @@ export default function LoginPage() {
         isHost: userProfile.isHost || false,
         isAdmin: userProfile.isAdmin || false,
       };
+
+      // Establish server-side session cookie for server actions
+      try {
+        const idToken = await firebaseUser.getIdToken(true);
+        const res = await createSessionFromIdToken(idToken);
+        if (!res?.success) {
+          console.warn('Failed to create server session from ID token');
+        }
+      } catch (e) {
+        console.error('Error creating server session from ID token:', e);
+      }
 
       login(authUser);
       toast({

@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { Separator } from './ui/separator';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
+import { logoutAction } from '@/app/login/actions';
 import type { AuthUser } from '@/lib/store';
 
 
@@ -132,6 +133,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      await logoutAction();
       logout();
       router.push('/');
     } catch (error) {

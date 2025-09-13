@@ -6,6 +6,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import type { AuthUser } from '@/lib/store';
 import { addUser } from '@/lib/firestore';
 import type { User } from '@/lib/types';
+import { setSessionCookie } from '@/lib/firebase/server';
 
 export async function signupAction(prevState: any, formData: FormData) {
   const fullName = formData.get('fullName') as string;
@@ -16,6 +17,9 @@ export async function signupAction(prevState: any, formData: FormData) {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    // Establish server-side session
+    const idToken = await user.getIdToken(true);
+    await setSessionCookie(idToken);
 
     // Update the user's profile with their full name
     await updateProfile(user, { displayName: fullName });
