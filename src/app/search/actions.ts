@@ -1,7 +1,7 @@
 
 'use server';
 
-import { getVehicles } from '@/lib/firestore';
+import { getVehiclesAdmin } from '@/lib/firestore-admin';
 import type { Vehicle } from '@/lib/types';
 import { z } from 'zod';
 
@@ -22,7 +22,7 @@ export async function getFilteredVehiclesAction(filters: z.infer<typeof FilterSc
   }
   
   try {
-    const vehicles = await getVehicles(undefined, parsedFilters.data);
+    const vehicles = await getVehiclesAdmin(undefined, parsedFilters.data);
     return vehicles;
   } catch (error) {
     console.error('Error fetching filtered vehicles:', error);
