@@ -2,6 +2,7 @@
 import { Suspense } from 'react';
 import { getVehiclesAdmin } from '@/lib/firestore-admin';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 import SearchPageClient from '@/components/search-page-client';
 import type { Vehicle } from '@/lib/types';
 
