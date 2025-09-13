@@ -1,5 +1,5 @@
 
-import { getVehicles } from '@/lib/firestore';
+import { getVehiclesAdmin } from '@/lib/firestore-admin';
 import type { MetadataRoute } from 'next';
 
 const BASE_URL = 'https://getdriveio.com';
@@ -25,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Dynamic pages (vehicle listings)
-  const vehicles = await getVehicles();
+  const vehicles = await getVehiclesAdmin();
   const vehicleRoutes = vehicles.map((vehicle) => ({
     url: `${BASE_URL}/listing/${vehicle.id}`,
     lastModified: new Date().toISOString(), // In a real app, you might use a vehicle's 'updatedAt' field

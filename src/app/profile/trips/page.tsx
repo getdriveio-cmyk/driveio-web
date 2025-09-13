@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import VehicleCard from "@/components/vehicle-card";
-import { getVehicles } from '@/lib/firestore';
+import { getVehiclesAdmin } from '@/lib/firestore-admin';
 import type { Vehicle } from '@/lib/types';
 import { Button } from "@/components/ui/button";
 
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export default async function MyTripsPage() {
     // In a real app, you would fetch actual booking data for the user.
     // For this demo, we'll fetch a sample of vehicles to represent trips.
-    const allVehicles = await getVehicles(4);
+    const allVehicles = await getVehiclesAdmin(4);
     const upcomingTrips = allVehicles.slice(0, 2);
     const pastTrips = allVehicles.slice(2, 4);
 

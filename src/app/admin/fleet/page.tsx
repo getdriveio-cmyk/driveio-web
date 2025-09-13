@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlusCircle, Upload, Edit, Trash2 } from "lucide-react";
-import { getVehicles } from '@/lib/firestore';
+import { getVehiclesAdmin } from '@/lib/firestore-admin';
 import type { Vehicle } from '@/lib/types';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -39,7 +39,7 @@ export default function AdminFleetPage() {
   
   useEffect(() => {
     async function fetchVehicles() {
-      const vehicleList = await getVehicles();
+      const vehicleList = await getVehiclesAdmin();
       setVehicles(vehicleList);
       setLoading(false);
     }

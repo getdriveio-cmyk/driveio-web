@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal, CarFront, CarTaxiFront, Rocket, Snowflake, Truck, Sailboat } from "lucide-react";
 import TestimonialCard from '@/components/testimonial-card';
-import { getVehicles } from '@/lib/firestore';
+import { getVehiclesAdmin } from '@/lib/firestore-admin';
 import type { Vehicle } from '@/lib/types';
 import SearchCard from '@/components/search-card';
 import type { Metadata } from 'next';
@@ -33,7 +33,7 @@ const vehicleTypes = [
 ];
 
 export default async function Home() {
-  const featuredVehicles: Vehicle[] = await getVehicles(4);
+  const featuredVehicles: Vehicle[] = await getVehiclesAdmin(4);
 
   return (
     <div className="space-y-16">
