@@ -5,8 +5,9 @@ export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
-    const filters = await req.json();
-    const vehicles = await getVehiclesAdmin(undefined, filters);
+    const body = await req.json().catch(() => ({}));
+    const { count, ...filters } = body || {};
+    const vehicles = await getVehiclesAdmin(typeof count === 'number' ? count : undefined, filters);
     return NextResponse.json({ vehicles });
   } catch (e) {
     console.error('Search API error:', e);

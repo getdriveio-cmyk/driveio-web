@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlusCircle, Upload, Edit, Trash2 } from "lucide-react";
-import { getVehiclesAdmin } from '@/lib/firestore-admin';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 import type { Vehicle } from '@/lib/types';
@@ -41,8 +40,13 @@ export default function AdminFleetPage() {
   
   useEffect(() => {
     async function fetchVehicles() {
-      const vehicleList = await getVehiclesAdmin();
-      setVehicles(vehicleList);
+      try {
+        const res = await fetch('/api/vehicles', { cache: 'no-store' });
+        const data = await res.json();
+        setVehicles(data.vehicles || []);
+      } catch (e) {
+        setVehicles([]);
+      }
       setLoading(false);
     }
     fetchVehicles();

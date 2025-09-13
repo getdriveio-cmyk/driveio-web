@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal, CarFront, CarTaxiFront, Rocket, Snowflake, Truck, Sailboat } from "lucide-react";
 import TestimonialCard from '@/components/testimonial-card';
-import { getVehiclesAdmin } from '@/lib/firestore-admin';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 import type { Vehicle } from '@/lib/types';
@@ -35,7 +34,9 @@ const vehicleTypes = [
 ];
 
 export default async function Home() {
-  const featuredVehicles: Vehicle[] = await getVehiclesAdmin(4);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/vehicles?count=4`, { cache: 'no-store' });
+  const data = await res.ok ? await res.json() : { vehicles: [] };
+  const featuredVehicles: Vehicle[] = data.vehicles || [];
 
   return (
     <div className="space-y-16">
