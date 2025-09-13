@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { SlidersHorizontal, CarFront, CarTaxiFront, Rocket, Snowflake, Truck, Sailboat } from "lucide-react";
 import TestimonialCard from '@/components/testimonial-card';
 import { getVehiclesAdmin } from '@/lib/firestore-admin';
+export const dynamic = 'force-dynamic';
 import type { Vehicle } from '@/lib/types';
 import SearchCard from '@/components/search-card';
 import type { Metadata } from 'next';
