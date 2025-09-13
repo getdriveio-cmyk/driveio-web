@@ -1,5 +1,5 @@
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
-import { app } from '@/lib/firebase/server';
+import { app } from '@/lib/firebase/admin-app';
 import type { Vehicle, Booking, User } from './types';
 
 const db = getFirestore(app);

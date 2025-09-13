@@ -2,14 +2,14 @@
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { readFile } from 'fs/promises';
-import { transpile } from 'typescript';
+import * as ts from 'typescript';
 import { pathToFileURL } from 'url';
 import 'dotenv/config';
 
 // A helper function to dynamically import and transpile the TS mock data
 async function importTsModule(modulePath) {
   const tsCode = await readFile(modulePath, 'utf8');
-  const jsCode = transpile(tsCode);
+  const jsCode = ts.transpile(tsCode, { module: ts.ModuleKind.ESNext });
   const tempJsPath = `${modulePath}.mjs`;
 
   // Use a data URL to avoid writing temporary files to disk

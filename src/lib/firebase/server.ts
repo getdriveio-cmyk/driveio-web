@@ -1,18 +1,8 @@
 
 import { getAuth } from 'firebase-admin/auth';
-import { getApps, initializeApp, cert } from 'firebase-admin/app';
 import { cookies } from 'next/headers';
 import { nextTick } from 'process';
-
-const serviceAccount = JSON.parse(
-    process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string
-);
-
-const app = !getApps().length
-  ? initializeApp({
-      credential: cert(serviceAccount),
-    })
-  : getApps()[0];
+import { app } from '@/lib/firebase/admin-app';
 
 const auth = async () => {
     const session = cookies().get('session')?.value;
@@ -52,4 +42,4 @@ const clearSessionCookie = () => {
     cookies().delete('session');
 };
 
-export { auth, setSessionCookie, clearSessionCookie, app };
+export { auth, setSessionCookie, clearSessionCookie };
