@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Hosts (Users) Collection
+    match /hosts/{userId} {
+      // Anyone can read a host's profile (for host profile pages)
+      allow read: if true;
+
+      // Only the authenticated user can create or update their own profile
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Vehicles Collection
+    match /vehicles/{vehicleId} {
+      // Anyone can read vehicle listings
+      allow read: if true;
+
+      // Only authenticated users who are hosts can create vehicles.
+      // The new vehicle's host ID must match the creator's user ID.
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.host.id;
+
+      // Only the host who owns the vehicle can update or delete it.
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.host.id;
+    }
+  }
+}

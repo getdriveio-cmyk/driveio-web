@@ -1,0 +1,9 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow: /admin/
+Disallow: /profile/
+Disallow: /checkout/
+Disallow: /booking/confirmed/
+Disallow: /messages/
+
+Sitemap: https://getdriveio.com/sitemap.xml
