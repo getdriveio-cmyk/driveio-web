@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/store';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send } from "lucide-react";
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp, query, where, onSnapshot, orderBy, limit, doc } from 'firebase/firestore';
 
 export default function MessagesPage() {
   const { isLoggedIn, isHydrating } = useAuth();
@@ -25,6 +27,50 @@ export default function MessagesPage() {
     return null; // or a loading spinner
   }
 
+  // Subscribe to user threads
+  const { user } = useAuth();
+  const [threads, setThreads] = useState<any[]>([]);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [compose, setCompose] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const threadsRef = collection(db, 'threads');
+    const qThreads = query(threadsRef, where('participants', 'array-contains', user.id), orderBy('updatedAt', 'desc'), limit(50));
+    const unsub = onSnapshot(qThreads, (snap) => {
+      const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
+      setThreads(items);
+      if (!activeThreadId && items.length) setActiveThreadId(items[0].id);
+    });
+    return () => unsub();
+  }, [user?.id, activeThreadId]);
+
+  useEffect(() => {
+    if (!activeThreadId) return;
+    const msgsRef = collection(db, 'threads', activeThreadId, 'messages');
+    const qMsgs = query(msgsRef, orderBy('createdAt', 'asc'), limit(200));
+    const unsub = onSnapshot(qMsgs, (snap) => {
+      setMessages(snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })));
+    });
+    return () => unsub();
+  }, [activeThreadId]);
+
+  const sendMessage = async () => {
+    if (!compose.trim() || !activeThreadId || !user?.id) return;
+    const msgsRef = collection(db, 'threads', activeThreadId, 'messages');
+    await addDoc(msgsRef, {
+      senderId: user.id,
+      text: compose.trim(),
+      createdAt: serverTimestamp(),
+    });
+    // touch thread updatedAt
+    await addDoc(collection(db, 'threads', activeThreadId, 'touch')), // no-op collection to avoid rules write; optional
+    setCompose('');
+    inputRef.current?.focus();
+  };
+
   return (
     <div className="h-[calc(100vh-10rem)] flex">
       <Card className="w-1/3 h-full flex flex-col">
@@ -34,17 +80,17 @@ export default function MessagesPage() {
         <ScrollArea className="flex-grow">
           <CardContent>
             <div className="space-y-2">
-              {['Eleanor Vance', 'Marcus Thorne', 'Support Team'].map((name, i) => (
-                <div key={i} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer ${i === 0 ? 'bg-secondary' : 'hover:bg-secondary'}`}>
+              {threads.map((t) => (
+                <div key={t.id} onClick={() => setActiveThreadId(t.id)} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer ${activeThreadId === t.id ? 'bg-secondary' : 'hover:bg-secondary'}`}>
                   <Avatar>
-                    <AvatarImage src={`https://picsum.photos/seed/msg${i}/40/40`} />
-                    <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={t.otherAvatar || 'https://picsum.photos/seed/thread/40/40'} />
+                    <AvatarFallback>{(t.otherName || '?').charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-grow">
-                    <p className="font-semibold">{name}</p>
-                    <p className="text-sm text-muted-foreground truncate">{i === 0 ? 'Sounds good, see you then!' : 'Can you confirm availability for...'}</p>
+                    <p className="font-semibold">{t.otherName || 'Conversation'}</p>
+                    <p className="text-sm text-muted-foreground truncate">{t.lastMessage || ''}</p>
                   </div>
-                  <span className="text-xs text-muted-foreground">3:45 PM</span>
+                  <span className="text-xs text-muted-foreground">{t.updatedAt?.toDate?.() ? new Date(t.updatedAt.toDate()).toLocaleTimeString() : ''}</span>
                 </div>
               ))}
             </div>
@@ -56,42 +102,28 @@ export default function MessagesPage() {
           <CardHeader className="border-b">
             <div className="flex items-center gap-3">
               <Avatar>
-                <AvatarImage src="https://picsum.photos/seed/msg0/40/40" />
-                <AvatarFallback>EV</AvatarFallback>
+                <AvatarImage src={threads.find(t => t.id === activeThreadId)?.otherAvatar || ''} />
+                <AvatarFallback>{(threads.find(t => t.id === activeThreadId)?.otherName || '?').charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-bold text-lg">Eleanor Vance</p>
-                <p className="text-sm text-muted-foreground">Online</p>
+                <p className="font-bold text-lg">{threads.find(t => t.id === activeThreadId)?.otherName || 'Select a conversation'}</p>
+                <p className="text-sm text-muted-foreground">&nbsp;</p>
               </div>
             </div>
           </CardHeader>
           <CardContent className="flex-grow p-6 space-y-4 overflow-y-auto">
-            {/* Chat messages */}
-            <div className="flex justify-start">
-              <div className="bg-secondary p-3 rounded-lg max-w-md">
-                <p>Hi there! I'm interested in booking your Tesla for the upcoming weekend. Is it available from Friday to Sunday?</p>
+            {messages.map((m) => (
+              <div key={m.id} className={`flex ${m.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
+                <div className={`${m.senderId === user?.id ? 'bg-primary text-primary-foreground' : 'bg-secondary'} p-3 rounded-lg max-w-md`}>
+                  <p>{m.text}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex justify-end">
-              <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-md">
-                <p>Hi! Yes, it's available. I've just updated the calendar. You can go ahead and book it.</p>
-              </div>
-            </div>
-            <div className="flex justify-start">
-              <div className="bg-secondary p-3 rounded-lg max-w-md">
-                <p>Perfect, thanks! Just one more question - what's the charging situation like? Should I return it fully charged?</p>
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-md">
-                <p>Please return it with at least 80% charge. There's a supercharger station just a few blocks from the pickup location. Sounds good, see you then!</p>
-              </div>
-            </div>
+            ))}
           </CardContent>
           <div className="p-4 border-t">
             <div className="relative">
-              <Input placeholder="Type a message..." className="pr-12" />
-              <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
+              <Input ref={inputRef} value={compose} onChange={(e) => setCompose(e.target.value)} placeholder="Type a message..." className="pr-12" />
+              <Button onClick={sendMessage} size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
                 <Send className="h-4 w-4" />
               </Button>
             </div>
