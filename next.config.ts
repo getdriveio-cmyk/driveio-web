@@ -36,12 +36,12 @@ const nextConfig: NextConfig = {
     const csp = [
       "default-src 'self'",
       // allow images from storage + data: for inline PaymentElement icons
-      "img-src 'self' https://firebasestorage.googleapis.com https://res.cloudinary.com data:",
+      "img-src 'self' https://firebasestorage.googleapis.com https://res.cloudinary.com https://placehold.co https://picsum.photos data:",
       // Stripe loads iframes and JS from stripe.com + js.stripe.com
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com",
       "frame-src https://js.stripe.com https://hooks.stripe.com https://connect-js.stripe.com",
       // connections to our APIs and Firebase/Stripe
-      "connect-src 'self' https://firebasestorage.googleapis.com https://api.resend.com https://hooks.stripe.com https://firebase.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firebasedynamiclinks.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com",
+      "connect-src 'self' https://firebasestorage.googleapis.com https://api.resend.com https://hooks.stripe.com https://firebase.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firebasedynamiclinks.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com",
       // styles (allow inline for Next/Stripe)
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       // fonts
@@ -61,9 +61,10 @@ const nextConfig: NextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(), camera=(), payment=(self "https://js.stripe.com")' },
-          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-          { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
+          // Relax COOP/COEP/CORP to allow third-party media like Cloudinary
+          // { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+          // { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+          // { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
         ],
       },
     ];
