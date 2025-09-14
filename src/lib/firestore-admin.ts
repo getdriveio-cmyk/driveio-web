@@ -105,4 +105,34 @@ export async function getBookingsAdmin(limitCount = 50): Promise<Booking[]> {
   }
 }
 
+export async function getBannedUsersAdmin(): Promise<User[]> {
+  try {
+    const snap = await db.collection('hosts').where('isBanned', '==', true).get();
+    return snap.docs.map(d => toUser(d.data(), d.id));
+  } catch (e) {
+    console.error('Admin getBannedUsers failed:', e);
+    return [];
+  }
+}
+
+export async function getContactsAdmin(limitCount = 100): Promise<any[]> {
+  try {
+    const snap = await db.collection('contacts').orderBy('submittedAt', 'desc').limit(limitCount).get();
+    return snap.docs.map(d => ({ id: d.id, ...(d.data() as any), submittedAt: toIso((d.data() as any)?.submittedAt) }));
+  } catch (e) {
+    console.error('Admin getContacts failed:', e);
+    return [];
+  }
+}
+
+export async function getAdminAuditLogs(limitCount = 100): Promise<any[]> {
+  try {
+    const snap = await db.collection('admin_audit').orderBy('at', 'desc').limit(limitCount).get();
+    return snap.docs.map(d => ({ id: d.id, ...(d.data() as any), at: toIso((d.data() as any)?.at) }));
+  } catch (e) {
+    console.error('Admin getAdminAuditLogs failed:', e);
+    return [];
+  }
+}
+
 

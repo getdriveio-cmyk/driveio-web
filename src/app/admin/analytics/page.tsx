@@ -1,4 +1,6 @@
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import DataCard from "@/components/admin/data-card";
@@ -6,13 +8,24 @@ import ChartCard from "@/components/admin/chart-card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DollarSign, Car, CalendarDays, Users, Download } from "lucide-react";
 
-const topVehicles = [
-    { name: 'Porsche 911 Carrera', rentals: 25, revenue: 11250 },
-    { name: 'Tesla Model 3', rentals: 30, revenue: 9000 },
-    { name: 'Ford Bronco', rentals: 22, revenue: 8250 },
-];
+import { getBookingsAdmin, getUsersAdmin, getVehiclesAdmin } from '@/lib/firestore-admin';
 
-export default function AdminAnalyticsPage() {
+export default async function AdminAnalyticsPage() {
+  const [bookings, users, vehicles] = await Promise.all([
+    getBookingsAdmin(200),
+    getUsersAdmin(),
+    getVehiclesAdmin(),
+  ]);
+  const revenue = bookings.reduce((sum, b: any) => sum + (Number(b.total) || 0), 0);
+  const topVehicles = Object.values(
+    bookings.reduce((acc: any, b: any) => {
+      const key = b.vehicle?.id || 'unknown';
+      if (!acc[key]) acc[key] = { name: `${b.vehicle?.make || ''} ${b.vehicle?.model || ''}`.trim(), rentals: 0, revenue: 0 };
+      acc[key].rentals += 1;
+      acc[key].revenue += Number(b.total) || 0;
+      return acc;
+    }, {})
+  ).sort((a: any, b: any) => b.revenue - a.revenue).slice(0, 5) as any[];
   return (
     <div className="space-y-8">
         <div>
@@ -23,25 +36,32 @@ export default function AdminAnalyticsPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <DataCard 
                 title="Total Revenue"
-                value="$52,341.89"
+                value={new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(revenue)}
                 icon={<DollarSign />}
                 description="+20.1% from last month"
             />
              <DataCard 
                 title="Total Rentals"
-                value="215"
+                value={String(bookings.length)}
                 icon={<Car />}
                 description="+15.2% from last month"
             />
              <DataCard 
                 title="Avg. Rental Duration"
-                value="3.2 Days"
+                value={(() => {
+                  const days = bookings.reduce((sum: number, b: any) => {
+                    const s = new Date(b.startDate).getTime();
+                    const e = new Date(b.endDate).getTime();
+                    return sum + Math.max(0, (e - s) / (1000*60*60*24));
+                  }, 0);
+                  return `${(days / Math.max(1, bookings.length)).toFixed(1)} Days`;
+                })()}
                 icon={<CalendarDays />}
                 description="-0.5 days from last month"
             />
              <DataCard 
-                title="New Users"
-                value="+122"
+                title="Users"
+                value={String(users.length)}
                 icon={<Users />}
                 description="+30% from last month"
             />
@@ -66,7 +86,7 @@ export default function AdminAnalyticsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {topVehicles.map((vehicle) => (
+                                {topVehicles.map((vehicle: any) => (
                                     <TableRow key={vehicle.name}>
                                         <TableCell className="font-medium">{vehicle.name}</TableCell>
                                         <TableCell className="text-right">${vehicle.revenue.toLocaleString()}</TableCell>
