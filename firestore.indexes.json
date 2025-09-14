@@ -50,7 +50,7 @@
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "ASCENDING" }
       ]
-    }
+    },
     {
       "collectionGroup": "threads",
       "queryScope": "COLLECTION",
