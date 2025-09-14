@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getUsersAdmin } from '@/lib/firestore-admin';
 import type { User } from '@/lib/types';
-import { banUserAction } from './actions';
-import { useToast } from '@/hooks/use-toast';
 
 export default async function AdminUsersPage() {
   const users = await getUsersAdmin();
@@ -82,13 +80,12 @@ export default async function AdminUsersPage() {
                   <TableCell>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm">Edit</Button>
-                      <Button 
-                        variant={user.isBanned ? "secondary" : "destructive"} 
-                        size="sm"
-                        onClick={() => handleBanToggle(user)}
-                      >
-                        {user.isBanned ? "Unban" : "Ban"}
-                      </Button>
+                      <form action={`/api/admin/users/${user.id}/ban`} method="post">
+                        <input type="hidden" name="isBanned" value={(!user.isBanned).toString()} />
+                        <Button variant={user.isBanned ? 'secondary' : 'destructive'} size="sm" type="submit">
+                          {user.isBanned ? 'Unban' : 'Ban'}
+                        </Button>
+                      </form>
                     </div>
                   </TableCell>
                 </TableRow>
