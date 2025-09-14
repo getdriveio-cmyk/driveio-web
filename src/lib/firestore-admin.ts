@@ -15,6 +15,14 @@ const toVehicle = (docData: any, id: string): Vehicle => {
   return { id, ...docData, host, reviews } as Vehicle;
 };
 
+const toUser = (docData: any, id: string): User => {
+  return {
+    id,
+    ...docData,
+    joinedDate: toIso(docData?.joinedDate),
+  } as User;
+};
+
 export interface VehicleFilters {
   type?: string;
   maxPrice?: number;
@@ -75,6 +83,26 @@ export async function hasBookingConflict(vehicleId: string, fromIso: string, toI
     }
   }
   return false;
+}
+
+export async function getUsersAdmin(): Promise<User[]> {
+  try {
+    const snap = await db.collection('hosts').get();
+    return snap.docs.map(d => toUser(d.data(), d.id));
+  } catch (e) {
+    console.error('Admin getUsers failed:', e);
+    return [];
+  }
+}
+
+export async function getBookingsAdmin(limitCount = 50): Promise<Booking[]> {
+  try {
+    const snap = await db.collection('bookings').orderBy('createdAt', 'desc').limit(limitCount).get();
+    return snap.docs.map(d => ({ id: d.id, ...(d.data() as any) } as Booking));
+  } catch (e) {
+    console.error('Admin getBookings failed:', e);
+    return [];
+  }
 }
 
 

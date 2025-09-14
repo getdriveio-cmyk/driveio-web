@@ -1,7 +1,7 @@
 
-'use client';
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,8 +13,8 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 import type { Vehicle } from '@/lib/types';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
 import { deleteVehicleAction } from './actions';
+import { getVehiclesAdmin } from '@/lib/firestore-admin';
 
 const getStatusBadgeVariant = (status: string) => {
   switch (status) {
@@ -31,26 +31,10 @@ const getStatusBadgeVariant = (status: string) => {
   }
 };
 
-export default function AdminFleetPage() {
-  const { toast } = useToast();
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
-  
-  useEffect(() => {
-    async function fetchVehicles() {
-      try {
-        const res = await fetch('/api/vehicles', { cache: 'no-store' });
-        const data = await res.json();
-        setVehicles(data.vehicles || []);
-      } catch (e) {
-        setVehicles([]);
-      }
-      setLoading(false);
-    }
-    fetchVehicles();
-  }, []);
+export default async function AdminFleetPage() {
+  const vehicles = await getVehiclesAdmin();
+  const isDeleteDialogOpen = false;
+  const selectedVehicle: Vehicle | null = null;
 
   const handleDeleteClick = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle);
@@ -78,10 +62,6 @@ export default function AdminFleetPage() {
     }
   };
 
-
-  if (loading) {
-    return <div>Loading fleet...</div>
-  }
 
   return (
     <>

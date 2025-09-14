@@ -1,29 +1,17 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getUsers } from '@/lib/firestore';
+import { getUsersAdmin } from '@/lib/firestore-admin';
 import type { User } from '@/lib/types';
 import { banUserAction } from './actions';
 import { useToast } from '@/hooks/use-toast';
 
-export default function AdminUsersPage() {
-  const { toast } = useToast();
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchUsers() {
-      const userList = await getUsers();
-      setUsers(userList);
-      setLoading(false);
-    }
-    fetchUsers();
-  }, []);
+export default async function AdminUsersPage() {
+  const users = await getUsersAdmin();
   
   const handleBanToggle = async (user: User) => {
     const isBanned = !user.isBanned;
