@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { auth } from '@/lib/firebase';
-import { GoogleAuthProvider, signInWithPopup, type User as FirebaseAuthUser } from 'firebase/auth';
+import { GoogleAuthProvider, OAuthProvider, signInWithRedirect, getRedirectResult, type User as FirebaseAuthUser } from 'firebase/auth';
 import type { AuthUser } from '@/lib/store';
 import { getUserByEmail, addUser } from '@/lib/firestore';
 import type { User } from '@/lib/types';
@@ -63,13 +63,18 @@ export default function LoginPage() {
       let provider;
       if (providerName === 'google') {
         provider = new GoogleAuthProvider();
+        await signInWithRedirect(auth, provider);
+        return;
       } else {
-        toast({ variant: 'destructive', title: 'Apple Login Not Implemented' });
+        const apple = new OAuthProvider('apple.com');
+        apple.addScope('email');
+        apple.addScope('name');
+        await signInWithRedirect(auth, apple);
         return;
       }
       
-      const result = await signInWithPopup(auth, provider);
-      const firebaseUser = result.user;
+      // unreachable
+      const firebaseUser = auth.currentUser as any;
       
       if (!firebaseUser.email) {
           throw new Error("No email returned from social provider.");
@@ -124,6 +129,58 @@ export default function LoginPage() {
       toast({ variant: 'destructive', title: 'Login Failed', description: 'An unexpected error occurred during social login.' });
     }
   };
+  // Handle redirect result for Google/Apple
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          const firebaseUser = result.user;
+          if (!firebaseUser.email) throw new Error('No email returned from provider');
+
+          let userProfile = await getUserByEmail(firebaseUser.email);
+          if (!userProfile) {
+            const newUser: Omit<User, 'id'> = {
+              name: firebaseUser.displayName || 'New User',
+              email: firebaseUser.email,
+              avatarUrl: firebaseUser.photoURL || `https://picsum.photos/seed/${firebaseUser.email}/40/40`,
+              isHost: false,
+              isAdmin: false,
+              isVerified: false,
+              joinedDate: new Date().toISOString(),
+            };
+            await addUser(firebaseUser.uid, newUser);
+            userProfile = { ...newUser, id: firebaseUser.uid };
+          }
+
+          const authUser: AuthUser = {
+            id: userProfile.id,
+            name: userProfile.name,
+            email: userProfile.email,
+            avatarUrl: userProfile.avatarUrl,
+            isHost: userProfile.isHost || false,
+            isAdmin: userProfile.isAdmin || false,
+          };
+
+          try {
+            const idToken = await firebaseUser.getIdToken(true);
+            const res = await createSessionFromIdToken(idToken);
+            if (!res?.success) {
+              console.warn('Failed to create server session from ID token');
+            }
+          } catch (e) {
+            console.error('Error creating server session from ID token:', e);
+          }
+
+          login(authUser);
+          toast({ title: 'Logged In!', description: `Welcome back, ${authUser.name}!` });
+          router.push('/profile');
+        }
+      } catch (err) {
+        // No redirect result; ignore
+      }
+    })();
+  }, [login, router, toast]);
 
 
   return (
