@@ -58,7 +58,7 @@
         { "fieldPath": "renter.id", "order": "ASCENDING" },
         { "fieldPath": "startDate", "order": "DESCENDING" }
       ]
-    }
+    },
     {
       "collectionGroup": "threads",
       "queryScope": "COLLECTION",
