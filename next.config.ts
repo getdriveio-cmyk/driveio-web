@@ -48,12 +48,12 @@ const nextConfig: NextConfig = {
     const csp = [
       "default-src 'self'",
       // allow images from storage + data: for inline PaymentElement icons
-      "img-src 'self' https://firebasestorage.googleapis.com https://res.cloudinary.com https://placehold.co https://picsum.photos https://lh3.googleusercontent.com https://googleusercontent.com https://*.googleusercontent.com data:",
+      "img-src 'self' https: data:",
       // Stripe loads iframes and JS from stripe.com + js.stripe.com
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://apis.google.com",
-      "frame-src https://js.stripe.com https://hooks.stripe.com https://connect-js.stripe.com https://accounts.google.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://apis.google.com https://www.gstatic.com https://www.google.com",
+      "frame-src https://js.stripe.com https://hooks.stripe.com https://connect-js.stripe.com https://accounts.google.com https://www.google.com",
       // connections to our APIs and Firebase/Stripe
-      "connect-src 'self' https://firebasestorage.googleapis.com https://api.resend.com https://hooks.stripe.com https://firebase.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firebasedynamiclinks.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://apis.google.com",
+      "connect-src 'self' https://firebasestorage.googleapis.com https://api.resend.com https://hooks.stripe.com https://firebase.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firebasedynamiclinks.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://apis.google.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net",
       // styles (allow inline for Next/Stripe)
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       // fonts
