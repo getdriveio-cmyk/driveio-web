@@ -9,7 +9,8 @@ export async function POST(req: NextRequest) {
   try {
     const appCheckToken = req.headers.get('X-Firebase-AppCheck') || req.headers.get('x-firebase-appcheck') || undefined;
     const { valid } = await verifyAppCheckToken(appCheckToken);
-    if (!valid) {
+    const enforce = process.env.APP_CHECK_ENFORCE === 'true';
+    if (enforce && !valid) {
       return NextResponse.json({ error: 'App Check verification failed' }, { status: 401 });
     }
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.ip || 'unknown';
