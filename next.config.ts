@@ -51,7 +51,7 @@ const nextConfig: NextConfig = {
       "img-src 'self' https: data:",
       // Stripe loads iframes and JS from stripe.com + js.stripe.com
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://apis.google.com https://www.gstatic.com https://www.google.com",
-      "frame-src https://js.stripe.com https://hooks.stripe.com https://connect-js.stripe.com https://accounts.google.com https://www.google.com",
+      "frame-src https://js.stripe.com https://hooks.stripe.com https://connect-js.stripe.com https://accounts.google.com https://www.google.com https://*.firebaseapp.com https://*.web.app",
       // connections to our APIs and Firebase/Stripe
       "connect-src 'self' https://firebasestorage.googleapis.com https://api.resend.com https://hooks.stripe.com https://firebase.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firebasedynamiclinks.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://apis.google.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net",
       // styles (allow inline for Next/Stripe)

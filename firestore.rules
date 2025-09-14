@@ -29,6 +29,15 @@ service cloud.firestore {
 
       // Only the host who owns the vehicle can update or delete it.
       allow update, delete: if request.auth != null && request.auth.uid == resource.data.host.id;
+
+      // Vehicle blackout dates subcollection
+      match /blackouts/{blackoutId} {
+        // Anyone can read blackout dates to disable calendars
+        allow read: if true;
+        // Only the host who owns the vehicle can manage blackouts
+        allow create, update, delete: if request.auth != null &&
+          request.auth.uid == get(/databases/$(database)/documents/vehicles/$(vehicleId)).data.host.id;
+      }
     }
 
     // Bookings Collection

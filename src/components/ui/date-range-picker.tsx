@@ -18,9 +18,10 @@ import {
 interface DateRangePickerProps extends React.ComponentProps<"div"> {
   date: DateRange | undefined;
   onDateChange?: (range: DateRange | undefined) => void;
+  disabledDays?: { from: Date; to: Date }[]; // new: ranges to disable
 }
 
-export function DateRangePicker({ className, date, onDateChange }: DateRangePickerProps) {
+export function DateRangePicker({ className, date, onDateChange, disabledDays }: DateRangePickerProps) {
 
   const handleDateSelect = (range: DateRange | undefined) => {
     if (onDateChange) {
@@ -63,7 +64,10 @@ export function DateRangePicker({ className, date, onDateChange }: DateRangePick
             selected={date}
             onSelect={handleDateSelect}
             numberOfMonths={2}
-            disabled={{ before: new Date() }}
+            disabled={[
+              { before: new Date() },
+              ...(disabledDays || []),
+            ]}
           />
         </PopoverContent>
       </Popover>
