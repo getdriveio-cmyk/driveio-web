@@ -135,4 +135,28 @@ export async function getAdminAuditLogs(limitCount = 100): Promise<any[]> {
   }
 }
 
+export async function getVehiclesByHostAdmin(hostId: string): Promise<Vehicle[]> {
+  try {
+    const snap = await db.collection('vehicles').where('host.id', '==', hostId).get();
+    return snap.docs.map(d => toVehicle(d.data(), d.id));
+  } catch (e) {
+    console.error('Admin getVehiclesByHost failed:', e);
+    return [];
+  }
+}
+
+export async function getBookingsForHostAdmin(hostId: string): Promise<Booking[]> {
+  try {
+    const snap = await db.collection('bookings')
+      .where('vehicle.host.id', '==', hostId)
+      .orderBy('startDate', 'desc')
+      .limit(200)
+      .get();
+    return snap.docs.map(d => ({ id: d.id, ...(d.data() as any) } as Booking));
+  } catch (e) {
+    console.error('Admin getBookingsForHost failed:', e);
+    return [];
+  }
+}
+
 
