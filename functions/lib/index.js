@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cleanStalePending = exports.onBookingUpdateEmail = exports.onBookingCreateEmail = exports.onBookingUpdate = exports.onHostUpdate = exports.cleanupDerived = exports.generateThumbnails = exports.ping = void 0;
+exports.cleanStalePending = exports.onVehicleDeleteIndex = exports.onVehicleUpdateIndex = exports.onVehicleCreateIndex = exports.onBookingUpdateEmail = exports.onBookingCreateEmail = exports.onBookingUpdate = exports.onHostUpdate = exports.cleanupDerived = exports.generateThumbnails = exports.ping = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-functions/v2/firestore");
 const scheduler_1 = require("firebase-functions/v2/scheduler");
@@ -48,6 +48,9 @@ const sharp_1 = __importDefault(require("sharp"));
 admin.initializeApp();
 (0, v2_1.setGlobalOptions)({ region: 'us-central1' });
 const RESEND_API_KEY = (0, params_1.defineSecret)('RESEND_API_KEY');
+const ALGOLIA_APP_ID = (0, params_1.defineSecret)('ALGOLIA_APP_ID');
+const ALGOLIA_ADMIN_KEY = (0, params_1.defineSecret)('ALGOLIA_ADMIN_KEY');
+const ALGOLIA_INDEX_VEHICLES = (0, params_1.defineSecret)('ALGOLIA_INDEX_VEHICLES');
 async function sendEmail(to, subject, html) {
     try {
         const resp = await fetch('https://api.resend.com/emails', {
@@ -183,6 +186,46 @@ exports.onBookingUpdateEmail = (0, firestore_1.onDocumentUpdated)({ document: 'b
     if (host.email) {
         await sendEmail(host.email, subject, html);
     }
+});
+// Algolia indexing for vehicles
+function getAlgoliaIndex() {
+    // Use require to avoid TS type issues under CommonJS
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const algoliasearch = require('algoliasearch');
+    const client = algoliasearch(ALGOLIA_APP_ID.value(), ALGOLIA_ADMIN_KEY.value());
+    return client.initIndex(ALGOLIA_INDEX_VEHICLES.value() || 'vehicles');
+}
+function vehicleToRecord(v) {
+    return {
+        objectID: v.id,
+        name: v.name,
+        make: v.make,
+        model: v.model,
+        year: v.year,
+        type: v.type,
+        pricePerDay: v.pricePerDay,
+        location: v.location,
+        rating: v.rating,
+        features: v.features,
+    };
+}
+exports.onVehicleCreateIndex = (0, firestore_1.onDocumentCreated)({ document: 'vehicles/{vehicleId}', secrets: [ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY, ALGOLIA_INDEX_VEHICLES] }, async (event) => {
+    const data = event.data?.data();
+    if (!data)
+        return;
+    const index = getAlgoliaIndex();
+    await index.saveObject(vehicleToRecord({ id: event.params.vehicleId, ...data }));
+});
+exports.onVehicleUpdateIndex = (0, firestore_1.onDocumentUpdated)({ document: 'vehicles/{vehicleId}', secrets: [ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY, ALGOLIA_INDEX_VEHICLES] }, async (event) => {
+    const after = event.data?.after?.data();
+    if (!after)
+        return;
+    const index = getAlgoliaIndex();
+    await index.saveObject(vehicleToRecord({ id: event.params.vehicleId, ...after }));
+});
+exports.onVehicleDeleteIndex = (0, firestore_1.onDocumentDeleted)({ document: 'vehicles/{vehicleId}', secrets: [ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY, ALGOLIA_INDEX_VEHICLES] }, async (event) => {
+    const index = getAlgoliaIndex();
+    await index.deleteObject(event.params.vehicleId);
 });
 // Scheduled cleanup: remove pending bookings older than 48h
 exports.cleanStalePending = (0, scheduler_1.onSchedule)('every 24 hours', async () => {

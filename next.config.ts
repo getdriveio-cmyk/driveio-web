@@ -48,7 +48,7 @@ const nextConfig: NextConfig = {
     const csp = [
       "default-src 'self'",
       // allow images from storage + data: for inline PaymentElement icons
-      "img-src 'self' https://firebasestorage.googleapis.com https://res.cloudinary.com https://placehold.co https://picsum.photos https://lh3.googleusercontent.com https://*.googleusercontent.com data:",
+      "img-src 'self' https://firebasestorage.googleapis.com https://res.cloudinary.com https://placehold.co https://picsum.photos https://lh3.googleusercontent.com https://googleusercontent.com https://*.googleusercontent.com data:",
       // Stripe loads iframes and JS from stripe.com + js.stripe.com
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://apis.google.com",
       "frame-src https://js.stripe.com https://hooks.stripe.com https://connect-js.stripe.com https://accounts.google.com",

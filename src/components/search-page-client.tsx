@@ -25,6 +25,8 @@ import AiAssistant from '@/components/ai-assistant';
 import { cn } from '@/lib/utils';
 import MapView from '@/components/map-view';
 import { addDays } from 'date-fns';
+import { app } from '@/lib/firebase';
+import { getAppCheck, getToken as getAppCheckToken } from 'firebase/app-check';
 // Use API route to avoid server action cross-origin issues on App Hosting
 
 const vehicleFeatures = ['Electric', '4x4', 'Autopilot', 'Convertible'];
@@ -173,9 +175,17 @@ export default function SearchPageClient({ allVehicles }: SearchPageClientProps)
   // This is the core logic change: fetch data when filters change
   const runSearch = useCallback(() => {
     startTransition(async () => {
+        let appCheckHeader: Record<string, string> = {};
+        try {
+          const ac = getAppCheck(app);
+          const token = await getAppCheckToken(ac, false);
+          if (token?.token) {
+            appCheckHeader = { 'X-Firebase-AppCheck': token.token };
+          }
+        } catch {}
         const res = await fetch('/api/search', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...appCheckHeader },
           body: JSON.stringify({
             type: typeFilter,
             maxPrice: priceFilter,

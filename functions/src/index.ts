@@ -4,7 +4,6 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onObjectFinalized, onObjectDeleted } from 'firebase-functions/v2/storage';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import { defineSecret } from 'firebase-functions/params';
-import algoliasearch from 'algoliasearch';
 import * as admin from 'firebase-admin';
 import sharp from 'sharp';
 
@@ -168,6 +167,9 @@ export const onBookingUpdateEmail = onDocumentUpdated({ document: 'bookings/{boo
 
 // Algolia indexing for vehicles
 function getAlgoliaIndex() {
+  // Use require to avoid TS type issues under CommonJS
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const algoliasearch = require('algoliasearch');
   const client = algoliasearch(ALGOLIA_APP_ID.value(), ALGOLIA_ADMIN_KEY.value());
   return client.initIndex(ALGOLIA_INDEX_VEHICLES.value() || 'vehicles');
 }
