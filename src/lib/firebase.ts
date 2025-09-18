@@ -22,9 +22,16 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Initialize Analytics only on the client side
+// Initialize Analytics and App Check only on the client side
 if (typeof window !== 'undefined') {
-  getAnalytics(app);
+  // Initialize Analytics
+  try {
+    getAnalytics(app);
+  } catch (e) {
+    console.warn('Analytics init failed', e);
+  }
+  
+  // Initialize App Check with reCAPTCHA v3
   try {
     const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_V3_SITE_KEY as string | undefined;
     if (siteKey) {
@@ -32,9 +39,11 @@ if (typeof window !== 'undefined') {
         provider: new ReCaptchaV3Provider(siteKey),
         isTokenAutoRefreshEnabled: true,
       });
+    } else {
+      console.warn('NEXT_PUBLIC_RECAPTCHA_V3_SITE_KEY not set - App Check disabled');
     }
   } catch (e) {
-    // app-check init best-effort; don't crash client
+    // App Check init best-effort; don't crash client
     console.warn('App Check init failed', e);
   }
 }
