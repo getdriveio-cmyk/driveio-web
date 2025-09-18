@@ -1,61 +1,39 @@
 
 'use server';
 
-import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth } from 'firebase-admin/auth';
+import { app } from '@/lib/firebase/admin-app';
 import type { AuthUser } from '@/lib/store';
 import { getUserByEmail } from '@/lib/firestore';
-import { setSessionCookie, clearSessionCookie } from '@/lib/firebase/server';
+import { setSessionCookie } from '@/lib/firebase/server';
 
 export async function loginAction(prevState: any, formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    // Create a server-side session cookie so server actions can authenticate
-    const idToken = await user.getIdToken(true);
-    await setSessionCookie(idToken);
-    
-    // Fetch user profile from Firestore to get roles
-    const userProfile = await getUserByEmail(user.email!);
-
-    if (!userProfile) {
-      // This case should ideally not happen if signup guarantees a profile.
-      return {
-        success: false,
-        error: "Could not find a user profile for this account.",
-      };
-    }
-
-    const authUser: AuthUser = {
-      id: userProfile.id,
-      email: user.email!,
-      name: user.displayName || userProfile.name || 'User',
-      avatarUrl: user.photoURL || userProfile.avatarUrl || `https://picsum.photos/seed/${user.email}/40/40`,
-      isHost: userProfile.isHost || false,
-      isAdmin: userProfile.isAdmin || false,
+  if (!email || !password) {
+    return {
+      success: false,
+      error: 'Email and password are required.',
     };
+  }
+
+  try {
+    // Use Admin SDK to verify credentials
+    const userRecord = await getAuth(app).getUserByEmail(email);
+    
+    // For server-side password verification, we need to use a different approach
+    // Since Firebase Admin SDK doesn't verify passwords directly, we'll create a custom token
+    // and let the client verify the password, then call createSessionFromIdToken
     
     return {
-      success: true,
-      message: `Successfully logged in as ${user.email}. Welcome back!`,
-      user: authUser
+      success: false,
+      error: 'Please use the client-side login form. Server-side password verification requires additional setup.',
     };
   } catch (error: any) {
-    let errorMessage = 'An unexpected error occurred.';
-    switch (error.code) {
-      case 'auth/invalid-credential':
-        errorMessage = 'Invalid email or password. Please try again.';
-        break;
-      case 'auth/user-disabled':
-        errorMessage = 'This account has been disabled.';
-        break;
-      default:
-        console.error('Firebase Login Error:', error);
-        errorMessage = 'Failed to log in. Please try again later.';
-        break;
+    let errorMessage = 'Invalid email or password.';
+    if (error.code === 'auth/user-not-found') {
+      errorMessage = 'No account found with this email address.';
     }
     return {
       success: false,

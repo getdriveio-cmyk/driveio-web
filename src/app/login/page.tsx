@@ -8,9 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { GoogleIcon, AppleIcon } from '@/components/social-icons';
-import { useActionState, useEffect, useRef } from 'react';
-import { useFormStatus } from 'react-dom';
-import { loginAction, createSessionFromIdToken } from './actions';
+import { useEffect, useRef, useState } from 'react';
+import { createSessionFromIdToken } from './actions';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/store';
 import { useRouter } from 'next/navigation';
@@ -23,40 +23,90 @@ import { getUserByEmail, addUser } from '@/lib/firestore';
 import type { User } from '@/lib/types';
 
 
-const initialState = {
-  message: '',
-  error: '',
-  user: null,
-  success: false,
-};
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
+function SubmitButton({ loading }: { loading: boolean }) {
   return (
-    <Button type="submit" className="w-full" disabled={pending}>
-      {pending ? 'Logging in...' : 'Log in'}
+    <Button type="submit" className="w-full" disabled={loading}>
+      {loading ? 'Logging in...' : 'Log in'}
     </Button>
   );
 }
 
 export default function LoginPage() {
   const { toast } = useToast();
-  const [state, formAction] = useActionState(loginAction, initialState);
   const router = useRouter();
   const login = useAuth.getState().login;
   const formRef = useRef<HTMLFormElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (state?.success && state?.user) {
+  const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Create server session
+      const idToken = await user.getIdToken(true);
+      const sessionResult = await createSessionFromIdToken(idToken);
+      
+      if (!sessionResult.success) {
+        console.warn('Failed to create server session');
+      }
+      
+      // Fetch user profile
+      const userProfile = await getUserByEmail(user.email!);
+      if (!userProfile) {
+        setError('Could not find user profile for this account.');
+        return;
+      }
+
+      const authUser: AuthUser = {
+        id: userProfile.id,
+        email: user.email!,
+        name: user.displayName || userProfile.name || 'User',
+        avatarUrl: user.photoURL || userProfile.avatarUrl || `https://picsum.photos/seed/${user.email}/40/40`,
+        isHost: userProfile.isHost || false,
+        isAdmin: userProfile.isAdmin || false,
+      };
+
+      login(authUser);
       toast({
         title: 'Logged In',
-        description: state.message,
+        description: `Welcome back, ${authUser.name}!`,
       });
-      login(state.user);
       formRef.current?.reset();
       router.push('/profile');
+    } catch (error: any) {
+      let errorMessage = 'An unexpected error occurred.';
+      switch (error.code) {
+        case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+        case 'auth/user-not-found':
+          errorMessage = 'Invalid email or password. Please try again.';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'This account has been disabled.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many failed attempts. Please try again later.';
+          break;
+        default:
+          console.error('Firebase Login Error:', error);
+          errorMessage = 'Failed to log in. Please try again later.';
+          break;
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
-  }, [state, toast, router, login]);
+  };
   
   const handleSocialLogin = async (providerName: 'google' | 'apple') => {
     try {
@@ -191,12 +241,12 @@ export default function LoginPage() {
           <CardDescription>Enter your credentials to access your account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form ref={formRef} action={formAction} className="grid gap-4">
-             {state?.error && (
+          <form ref={formRef} onSubmit={handleEmailLogin} className="grid gap-4">
+             {error && (
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Login Failed</AlertTitle>
-                <AlertDescription>{state.error}</AlertDescription>
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             <div className="grid gap-2">
@@ -212,7 +262,7 @@ export default function LoginPage() {
               </div>
               <Input id="password" type="password" name="password" required />
             </div>
-            <SubmitButton />
+            <SubmitButton loading={loading} />
           </form>
           
           <Separator className="my-4" />
