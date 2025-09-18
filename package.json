@@ -1,4 +1,3 @@
-
 {
   "name": "nextn",
   "version": "0.1.0",
@@ -11,7 +10,10 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "seed": "node scripts/seed-firestore.mjs"
+    "seed": "node scripts/seed-firestore.mjs",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
@@ -64,10 +66,12 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "genkit-cli": "^1.14.1",
+    "playwright": "^1.55.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"

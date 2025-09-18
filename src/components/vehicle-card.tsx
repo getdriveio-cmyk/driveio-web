@@ -35,7 +35,7 @@ const VehicleCard = ({ vehicle }: VehicleCardProps) => {
   };
 
   return (
-    <Link href={`/listing/${vehicle.id}`} className="block group">
+    <Link href={`/listing/${vehicle.id}`} className="block group" data-testid="vehicle-card">
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
         <div className="relative w-full aspect-video">
           <Image
