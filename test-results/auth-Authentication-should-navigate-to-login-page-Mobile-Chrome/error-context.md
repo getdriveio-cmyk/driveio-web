@@ -1,0 +1,197 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e7] [cursor=pointer]:
+            - generic [ref=e8] [cursor=pointer]: DriveIO
+        - button "Toggle Menu" [ref=e10] [cursor=pointer]:
+          - img
+          - generic [ref=e11] [cursor=pointer]: Toggle Menu
+    - main [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e17]:
+          - heading "Go Further with DriveIO" [level=1] [ref=e18]
+          - paragraph [ref=e19]: Book unique cars from trusted hosts.
+          - generic [ref=e21]:
+            - generic [ref=e22]:
+              - generic [ref=e23]: Location
+              - textbox "Location" [ref=e24]
+            - generic [ref=e25]:
+              - generic [ref=e26]: Trip Dates
+              - button "Sep 18, 2025 - Sep 25, 2025" [ref=e28] [cursor=pointer]:
+                - img
+                - text: Sep 18, 2025 - Sep 25, 2025
+            - link "Search" [ref=e29] [cursor=pointer]:
+              - /url: /search
+              - img
+              - text: Search
+        - generic [ref=e30]:
+          - heading "Browse by Type" [level=2] [ref=e31]
+          - generic [ref=e32]:
+            - link "Sedan" [ref=e33] [cursor=pointer]:
+              - /url: /search?type=sedan
+              - generic [ref=e34] [cursor=pointer]:
+                - img [ref=e35] [cursor=pointer]
+                - paragraph [ref=e38] [cursor=pointer]: Sedan
+            - link "SUV" [ref=e39] [cursor=pointer]:
+              - /url: /search?type=suv
+              - generic [ref=e40] [cursor=pointer]:
+                - img [ref=e41] [cursor=pointer]
+                - paragraph [ref=e44] [cursor=pointer]: SUV
+            - link "Sports" [ref=e45] [cursor=pointer]:
+              - /url: /search?type=sports
+              - generic [ref=e46] [cursor=pointer]:
+                - img [ref=e47] [cursor=pointer]
+                - paragraph [ref=e52] [cursor=pointer]: Sports
+            - link "Convertible" [ref=e53] [cursor=pointer]:
+              - /url: /search?type=convertible
+              - generic [ref=e54] [cursor=pointer]:
+                - img [ref=e55] [cursor=pointer]
+                - paragraph [ref=e68] [cursor=pointer]: Convertible
+            - link "Truck" [ref=e69] [cursor=pointer]:
+              - /url: /search?type=truck
+              - generic [ref=e70] [cursor=pointer]:
+                - img [ref=e71] [cursor=pointer]
+                - paragraph [ref=e76] [cursor=pointer]: Truck
+            - link "Van" [ref=e77] [cursor=pointer]:
+              - /url: /search?type=van
+              - generic [ref=e78] [cursor=pointer]:
+                - img [ref=e79] [cursor=pointer]
+                - paragraph [ref=e82] [cursor=pointer]: Van
+        - generic [ref=e83]:
+          - generic [ref=e84]:
+            - heading "Featured Vehicles" [level=2] [ref=e85]
+            - generic [ref=e86]:
+              - link "All Filters" [ref=e87] [cursor=pointer]:
+                - /url: /search
+                - img
+                - text: All Filters
+              - combobox [ref=e88] [cursor=pointer]:
+                - generic: Sort by
+                - img [ref=e89] [cursor=pointer]
+          - link "View All Vehicles" [ref=e92] [cursor=pointer]:
+            - /url: /search
+        - generic [ref=e97]:
+          - heading "Find the Drive of Your Life" [level=2] [ref=e98]
+          - paragraph [ref=e99]: From luxury sedans for a special occasion to rugged SUVs for an outdoor adventure, your perfect car is just a search away.
+        - generic [ref=e100]:
+          - heading "What Our Renters Say" [level=2] [ref=e101]
+          - generic [ref=e102]:
+            - generic [ref=e104]:
+              - generic [ref=e105]:
+                - img "Sarah K." [ref=e107]
+                - generic [ref=e108]:
+                  - paragraph [ref=e109]: Sarah K.
+                  - paragraph [ref=e110]: Los Angeles, CA
+              - generic [ref=e111]:
+                - img [ref=e112]
+                - img [ref=e114]
+                - img [ref=e116]
+                - img [ref=e118]
+                - img [ref=e120]
+              - paragraph [ref=e122]: "\"The whole process was incredibly smooth. I found the perfect convertible for a weekend trip up the coast. The host was friendly and the car was immaculate. Will definitely use DriveIO again!\""
+            - generic [ref=e124]:
+              - generic [ref=e125]:
+                - img "Mike P." [ref=e127]
+                - generic [ref=e128]:
+                  - paragraph [ref=e129]: Mike P.
+                  - paragraph [ref=e130]: Denver, CO
+              - generic [ref=e131]:
+                - img [ref=e132]
+                - img [ref=e134]
+                - img [ref=e136]
+                - img [ref=e138]
+                - img [ref=e140]
+              - paragraph [ref=e142]: "\"Needed an SUV with 4x4 for a ski trip and found a great deal on a Ford Bronco. The AI assistant helped me find it in seconds. Pick-up was easy and the vehicle was a beast in the snow.\""
+            - generic [ref=e144]:
+              - generic [ref=e145]:
+                - img "Jessica L." [ref=e147]
+                - generic [ref=e148]:
+                  - paragraph [ref=e149]: Jessica L.
+                  - paragraph [ref=e150]: New York, NY
+              - generic [ref=e151]:
+                - img [ref=e152]
+                - img [ref=e154]
+                - img [ref=e156]
+                - img [ref=e158]
+                - img [ref=e160]
+              - paragraph [ref=e162]: "\"I was hesitant about car sharing, but DriveIO made me a convert. The insurance options gave me peace of mind, and the car was exactly as described. So much better than a traditional rental agency.\""
+    - contentinfo [ref=e163]:
+      - generic [ref=e164]:
+        - generic [ref=e165]:
+          - generic [ref=e166]:
+            - img [ref=e167]:
+              - generic [ref=e168]: DriveIO
+            - paragraph [ref=e169]: Your journey, your car. Seamless rentals at your fingertips.
+            - generic [ref=e170]:
+              - link [ref=e171] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e172] [cursor=pointer]
+              - link [ref=e174] [cursor=pointer]:
+                - /url: https://x.com/GetDriveIO
+                - img [ref=e175] [cursor=pointer]
+              - link [ref=e177] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e178] [cursor=pointer]
+          - generic [ref=e181]:
+            - heading "Explore" [level=3] [ref=e182]
+            - list [ref=e183]:
+              - listitem [ref=e184]:
+                - link "About Us" [ref=e185] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e186]:
+                - link "Careers" [ref=e187] [cursor=pointer]:
+                  - /url: /careers
+              - listitem [ref=e188]:
+                - link "Press" [ref=e189] [cursor=pointer]:
+                  - /url: /press
+          - generic [ref=e190]:
+            - heading "Hosting" [level=3] [ref=e191]
+            - list [ref=e192]:
+              - listitem [ref=e193]:
+                - link "List Your Car" [ref=e194] [cursor=pointer]:
+                  - /url: /host
+              - listitem [ref=e195]:
+                - link "Host Guidelines" [ref=e196] [cursor=pointer]:
+                  - /url: /hosting/guidelines
+              - listitem [ref=e197]:
+                - link "Insurance & Protection" [ref=e198] [cursor=pointer]:
+                  - /url: /hosting/insurance
+          - generic [ref=e199]:
+            - heading "Support" [level=3] [ref=e200]
+            - list [ref=e201]:
+              - listitem [ref=e202]:
+                - link "Help Center" [ref=e203] [cursor=pointer]:
+                  - /url: /help-center
+              - listitem [ref=e204]:
+                - link "Contact Us" [ref=e205] [cursor=pointer]:
+                  - /url: /contact
+              - listitem [ref=e206]:
+                - link "Terms of Service" [ref=e207] [cursor=pointer]:
+                  - /url: /terms-of-service
+              - listitem [ref=e208]:
+                - link "Privacy Policy" [ref=e209] [cursor=pointer]:
+                  - /url: /privacy-policy
+        - paragraph [ref=e211]: © 2025 DriveIO, Inc. All rights reserved.
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e213]:
+    - paragraph [ref=e214]:
+      - text: We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
+      - link "Learn more" [ref=e215] [cursor=pointer]:
+        - /url: /privacy-policy
+      - text: .
+    - generic [ref=e216]:
+      - button "Decline" [ref=e217] [cursor=pointer]
+      - button "Accept" [ref=e218] [cursor=pointer]
+  - alert [ref=e219]
+  - button "Open Next.js Dev Tools" [ref=e225] [cursor=pointer]:
+    - img [ref=e226] [cursor=pointer]
+  - iframe [ref=e229]:
+    
+```
