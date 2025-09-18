@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import LayoutWrapper from '@/components/layout-wrapper';
 import CookieBanner from '@/components/cookie-banner';
 import TrackingPixel from '@/components/tracking-pixel';
+import { FirebaseStatus } from '@/components/firebase-status';
 
 // This metadata will be the fallback for all pages.
 // Specific pages will override this with their own metadata.
@@ -63,6 +64,18 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        
+        {/* PWA Manifest */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#2563eb" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="DriveIO" />
+        
+        {/* PWA Icons */}
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/icon-16x16.png" />
       </head>
       <body className={cn('font-body antialiased')}>
         <LayoutWrapper>
@@ -71,6 +84,7 @@ export default function RootLayout({
         <Toaster />
         <CookieBanner />
         <TrackingPixel />
+        <FirebaseStatus />
       </body>
     </html>
   );

@@ -95,5 +95,21 @@ service cloud.firestore {
     match /rate_limits/{docId} {
       allow read, write: if false;
     }
+
+    // Testimonials - read-only for users, admin-only writes
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Analytics and monitoring - admin only
+    match /analytics/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // System health checks - admin only
+    match /system/{docId} {
+      allow read, write: if isAdmin();
+    }
   }
 }

@@ -2,18 +2,28 @@
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
-  maxInstances: 1
+  # Optimize for production traffic
+  minInstances: 1
+  maxInstances: 10
+  cpu: 1
+  memory: 2Gi
+  concurrency: 80
   env:
+    # Firebase Admin SDK
+    - variable: FIREBASE_PROJECT_ID
+      value: "studio-2955014337-be726"
     - variable: FIREBASE_SERVICE_ACCOUNT_KEY
       secret: FIREBASE_SERVICE_ACCOUNT_KEY
+    # App Check & Security
     - variable: NEXT_PUBLIC_RECAPTCHA_V3_SITE_KEY
-      value: "6Leum8grAAAAANQliesqPNbXCYLd4CDEL4ZGGzhd"
+      secret: RECAPTCHA_V3_SITE_KEY
+    - variable: APP_CHECK_ENFORCE
+      value: "true"
+    # Admin Access
     - variable: ADMIN_BOOTSTRAP_TOKEN
       secret: ADMIN_BOOTSTRAP_TOKEN
-    - variable: APP_CHECK_ENFORCE
-      value: "false"
-env:
-  - variable: ADMIN_BOOTSTRAP_TOKEN
-    secret: ADMIN_BOOTSTRAP_TOKEN
+    # Performance Optimizations
+    - variable: NODE_ENV
+      value: "production"
+    - variable: NEXT_TELEMETRY_DISABLED
+      value: "1"
