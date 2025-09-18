@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import VehicleCard from "@/components/vehicle-card";
-import { testimonials } from "@/lib/mock-data";
+import { getTestimonialsAdmin } from '@/lib/firestore-admin';
 import {
   Select,
   SelectContent,
@@ -42,6 +42,9 @@ export default async function Home() {
   const res = await fetch(`${baseUrl}/api/vehicles?count=4`, { cache: 'no-store' });
   const data = await res.ok ? await res.json() : { vehicles: [] };
   const featuredVehicles: Vehicle[] = data.vehicles || [];
+  
+  // Fetch testimonials from Firestore
+  const testimonials = await getTestimonialsAdmin();
 
   return (
     <div className="space-y-16">

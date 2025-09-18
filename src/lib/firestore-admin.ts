@@ -1,6 +1,6 @@
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { app } from '@/lib/firebase/admin-app';
-import type { Vehicle, Booking, User } from './types';
+import type { Vehicle, Booking, User, Testimonial } from './types';
 
 const db = getFirestore(app);
 
@@ -155,6 +155,16 @@ export async function getBookingsForHostAdmin(hostId: string): Promise<Booking[]
     return snap.docs.map(d => ({ id: d.id, ...(d.data() as any) } as Booking));
   } catch (e) {
     console.error('Admin getBookingsForHost failed:', e);
+    return [];
+  }
+}
+
+export async function getTestimonialsAdmin(): Promise<Testimonial[]> {
+  try {
+    const snap = await db.collection('testimonials').orderBy('rating', 'desc').limit(10).get();
+    return snap.docs.map(d => ({ id: d.id, ...(d.data() as any) } as Testimonial));
+  } catch (e) {
+    console.error('Admin getTestimonials failed:', e);
     return [];
   }
 }
