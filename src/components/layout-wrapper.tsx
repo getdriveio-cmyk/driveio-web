@@ -4,6 +4,7 @@
 import { usePathname } from 'next/navigation';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import { ErrorBoundary } from '@/components/error-boundary';
 
 // Helper component to conditionally render layout
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -20,7 +21,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </main>
       <Footer />
     </div>

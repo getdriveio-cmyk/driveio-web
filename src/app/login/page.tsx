@@ -218,8 +218,12 @@ export default function LoginPage() {
           <Separator className="my-4" />
 
           <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" onClick={() => handleSocialLogin('google')}><GoogleIcon /> <span className="ml-2">Google</span></Button>
-              <Button variant="outline" onClick={() => handleSocialLogin('apple')}><AppleIcon /> <span className="ml-2">Apple</span></Button>
+              <Button variant="outline" onClick={() => handleSocialLogin('google')} aria-label="Sign in with Google">
+                <GoogleIcon /> <span className="ml-2">Google</span>
+              </Button>
+              <Button variant="outline" onClick={() => handleSocialLogin('apple')} aria-label="Sign in with Apple">
+                <AppleIcon /> <span className="ml-2">Apple</span>
+              </Button>
           </div>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}

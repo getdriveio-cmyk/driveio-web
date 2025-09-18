@@ -27,6 +27,7 @@ import MapView from '@/components/map-view';
 import { addDays } from 'date-fns';
 import { app } from '@/lib/firebase';
 import { getAppCheck, getToken as getAppCheckToken } from 'firebase/app-check';
+import { SearchResultsSkeleton } from '@/components/ui/skeleton';
 // Use API route to avoid server action cross-origin issues on App Hosting
 
 const vehicleFeatures = ['Electric', '4x4', 'Autopilot', 'Convertible'];
@@ -195,6 +196,7 @@ export default function SearchPageClient({ allVehicles }: SearchPageClientProps)
           })
         });
         if (!res.ok) {
+          console.error('Search failed:', res.status, res.statusText);
           setFilteredVehicles([]);
           return;
         }
@@ -245,9 +247,7 @@ export default function SearchPageClient({ allVehicles }: SearchPageClientProps)
           </div>
         </div>
         {isPending ? (
-            <div className="flex justify-center items-center h-96">
-                <Loader2 className="w-12 h-12 animate-spin text-primary" />
-            </div>
+            <SearchResultsSkeleton />
         ) : view === 'list' ? (
             filteredVehicles.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -258,9 +258,19 @@ export default function SearchPageClient({ allVehicles }: SearchPageClientProps)
             ) : (
               <Card>
                 <CardContent className="p-8 text-center space-y-4">
+                  <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+                    <CarFront className="w-8 h-8 text-muted-foreground" />
+                  </div>
                   <h3 className="text-xl font-semibold">No vehicles found</h3>
-                  <p className="text-muted-foreground">Try adjusting your filters or searching a different location.</p>
-                  <Button onClick={resetFilters}>Clear Filters</Button>
+                  <p className="text-muted-foreground">
+                    We couldn't find any vehicles matching your criteria. Try adjusting your filters or searching a different location.
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    <Button onClick={resetFilters} variant="outline">Clear Filters</Button>
+                    <Button asChild>
+                      <Link href="/search">Browse All</Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )

@@ -68,8 +68,17 @@ export const BookingCard = ({ vehicle }: { vehicle: Vehicle }) => {
                     <span>${total.toLocaleString()}</span>
                 </div>
             </div>
-            <Button size="lg" className="w-full" disabled={!total} asChild>
-                <Link href={checkoutUrl}>Book Now</Link>
+            <Button 
+                size="lg" 
+                className="w-full" 
+                disabled={!total || !fromDate || !toDate}
+                asChild={total && fromDate && toDate}
+            >
+                {total && fromDate && toDate ? (
+                    <Link href={checkoutUrl}>Book Now</Link>
+                ) : (
+                    <span>Select dates to book</span>
+                )}
             </Button>
         </CardContent>
     </Card>

@@ -23,10 +23,12 @@ export default function CheckoutForm({ onSuccess }: CheckoutFormProps) {
     e.preventDefault();
 
     if (!stripe || !elements) {
+      setMessage('Payment system not ready. Please wait a moment and try again.');
       return;
     }
 
     setIsLoading(true);
+    setMessage(null);
 
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
