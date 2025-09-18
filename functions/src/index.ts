@@ -230,7 +230,7 @@ export const cleanStalePending = onSchedule('every 24 hours', async () => {
 // System health monitoring
 export const healthCheck = onSchedule('every 5 minutes', async () => {
   const timestamp = admin.firestore.FieldValue.serverTimestamp();
-  const healthData = {
+  const healthData: any = {
     timestamp,
     services: {
       firestore: true,
@@ -261,7 +261,7 @@ export const healthCheck = onSchedule('every 5 minutes', async () => {
       storage: false,
       auth: false,
     };
-    healthData.error = error.message;
+    healthData.error = error instanceof Error ? error.message : 'Unknown error';
   }
 });
 

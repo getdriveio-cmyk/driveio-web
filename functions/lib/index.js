@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cleanStalePending = exports.onVehicleDeleteIndex = exports.onVehicleUpdateIndex = exports.onVehicleCreateIndex = exports.onBookingUpdateEmail = exports.onBookingCreateEmail = exports.onBookingUpdate = exports.onHostUpdate = exports.cleanupDerived = exports.generateThumbnails = exports.ping = void 0;
+exports.apiMetrics = exports.healthCheck = exports.cleanStalePending = exports.onVehicleDeleteIndex = exports.onVehicleUpdateIndex = exports.onVehicleCreateIndex = exports.onBookingUpdateEmail = exports.onBookingCreateEmail = exports.onBookingUpdate = exports.onHostUpdate = exports.cleanupDerived = exports.generateThumbnails = exports.ping = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-functions/v2/firestore");
 const scheduler_1 = require("firebase-functions/v2/scheduler");
@@ -236,4 +236,63 @@ exports.cleanStalePending = (0, scheduler_1.onSchedule)('every 24 hours', async 
     const batch = admin.firestore().batch();
     snap.forEach(doc => batch.delete(doc.ref));
     await batch.commit();
+    // Log cleanup activity
+    await admin.firestore().collection('analytics').add({
+        type: 'cleanup',
+        action: 'stale_bookings_removed',
+        count: snap.size,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+});
+// System health monitoring
+exports.healthCheck = (0, scheduler_1.onSchedule)('every 5 minutes', async () => {
+    const timestamp = admin.firestore.FieldValue.serverTimestamp();
+    const healthData = {
+        timestamp,
+        services: {
+            firestore: true,
+            storage: true,
+            auth: true,
+        },
+        metrics: {
+            memory: process.memoryUsage(),
+            uptime: process.uptime(),
+        },
+    };
+    try {
+        // Test Firestore connectivity
+        await admin.firestore().collection('system').doc('health').set(healthData);
+        // Test Storage connectivity
+        const bucket = admin.storage().bucket();
+        await bucket.exists();
+        // Test Auth connectivity  
+        await admin.auth().listUsers(1);
+    }
+    catch (error) {
+        console.error('Health check failed:', error);
+        healthData.services = {
+            firestore: false,
+            storage: false,
+            auth: false,
+        };
+        healthData.error = error instanceof Error ? error.message : 'Unknown error';
+    }
+});
+// Performance monitoring for API endpoints
+exports.apiMetrics = (0, https_1.onRequest)({ cors: true }, async (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    try {
+        const metrics = await admin.firestore()
+            .collection('analytics')
+            .where('type', '==', 'api_call')
+            .orderBy('timestamp', 'desc')
+            .limit(100)
+            .get();
+        const data = metrics.docs.map(doc => doc.data());
+        res.status(200).json({ metrics: data, count: data.length });
+    }
+    catch (error) {
+        console.error('Metrics fetch failed:', error);
+        res.status(500).json({ error: 'Failed to fetch metrics' });
+    }
 });
