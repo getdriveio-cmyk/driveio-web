@@ -1,0 +1,178 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - alert [ref=e1]
+  - generic [active]:
+    - generic [ref=e6] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+        - img [ref=e8] [cursor=pointer]
+      - button "Open issues overlay" [ref=e13] [cursor=pointer]:
+        - generic [ref=e14] [cursor=pointer]:
+          - generic [ref=e15] [cursor=pointer]: "0"
+          - generic [ref=e16] [cursor=pointer]: "1"
+        - generic [ref=e17] [cursor=pointer]: Issue
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - navigation [ref=e23]:
+            - button "previous" [disabled] [ref=e24]:
+              - img "previous" [ref=e25]
+            - generic [ref=e27]:
+              - generic [ref=e28]: 1/
+              - generic [ref=e29]: "1"
+            - button "next" [disabled] [ref=e30]:
+              - img "next" [ref=e31]
+          - img
+        - generic [ref=e33]:
+          - link "Next.js 15.3.3 (stale) Turbopack" [ref=e34] [cursor=pointer]:
+            - /url: https://nextjs.org/docs/messages/version-staleness
+            - img [ref=e35] [cursor=pointer]
+            - generic "There is a newer version (15.5.3) available, upgrade recommended!" [ref=e37] [cursor=pointer]: Next.js 15.3.3 (stale)
+            - generic [ref=e38] [cursor=pointer]: Turbopack
+          - img
+      - generic [ref=e39]:
+        - dialog "Build Error" [ref=e40]:
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]:
+                - generic [ref=e45]:
+                  - generic [ref=e47]: Build Error
+                  - generic [ref=e48]:
+                    - button "Copy Stack Trace" [ref=e49] [cursor=pointer]:
+                      - img [ref=e50] [cursor=pointer]
+                    - button "No related documentation found" [disabled] [ref=e52]:
+                      - img [ref=e53]
+                    - link "Learn more about enabling Node.js inspector for server code with Chrome DevTools" [ref=e55] [cursor=pointer]:
+                      - /url: https://nextjs.org/docs/app/building-your-application/configuring/debugging#server-side-code
+                      - img [ref=e56] [cursor=pointer]
+                - paragraph [ref=e65]: Export getAppCheck doesn't exist in target module
+              - generic [ref=e67]:
+                - generic [ref=e69]:
+                  - img [ref=e71]
+                  - generic [ref=e74]: ./src/components/search-page-client.tsx (29:1)
+                  - button "Open in editor" [ref=e75] [cursor=pointer]:
+                    - img [ref=e77] [cursor=pointer]
+                - generic [ref=e79]:
+                  - generic [ref=e80]: Export getAppCheck doesn't exist in target module
+                  - generic [ref=e82]: 27 |
+                  - generic [ref=e84]: import
+                  - generic [ref=e85]: "{ addDays }"
+                  - generic [ref=e86]: from
+                  - generic [ref=e88]: "'date-fns'"
+                  - generic [ref=e89]: ;
+                  - generic [ref=e91]: 28 |
+                  - generic [ref=e93]: import
+                  - generic [ref=e94]: "{ app }"
+                  - generic [ref=e95]: from
+                  - generic [ref=e97]: "'@/lib/firebase'"
+                  - generic [ref=e98]: ;
+                  - generic [ref=e99]: ">"
+                  - generic [ref=e100]: 29 |
+                  - generic [ref=e102]: import
+                  - generic [ref=e103]: "{ getAppCheck"
+                  - generic [ref=e104]: ","
+                  - generic [ref=e105]: getToken
+                  - generic [ref=e106]: as
+                  - generic [ref=e107]: "getAppCheckToken }"
+                  - generic [ref=e108]: from
+                  - generic [ref=e110]: "'firebase/app-check'"
+                  - generic [ref=e111]: ;
+                  - generic [ref=e113]: "|"
+                  - generic [ref=e115]: ^
+                  - generic [ref=e116]: ^
+                  - generic [ref=e117]: ^
+                  - generic [ref=e118]: ^
+                  - generic [ref=e119]: ^
+                  - generic [ref=e120]: ^
+                  - generic [ref=e121]: ^
+                  - generic [ref=e122]: ^
+                  - generic [ref=e123]: ^
+                  - generic [ref=e124]: ^
+                  - generic [ref=e125]: ^
+                  - generic [ref=e126]: ^
+                  - generic [ref=e127]: ^
+                  - generic [ref=e128]: ^
+                  - generic [ref=e129]: ^
+                  - generic [ref=e130]: ^
+                  - generic [ref=e131]: ^
+                  - generic [ref=e132]: ^
+                  - generic [ref=e133]: ^
+                  - generic [ref=e134]: ^
+                  - generic [ref=e135]: ^
+                  - generic [ref=e136]: ^
+                  - generic [ref=e137]: ^
+                  - generic [ref=e138]: ^
+                  - generic [ref=e139]: ^
+                  - generic [ref=e140]: ^
+                  - generic [ref=e141]: ^
+                  - generic [ref=e142]: ^
+                  - generic [ref=e143]: ^
+                  - generic [ref=e144]: ^
+                  - generic [ref=e145]: ^
+                  - generic [ref=e146]: ^
+                  - generic [ref=e147]: ^
+                  - generic [ref=e148]: ^
+                  - generic [ref=e149]: ^
+                  - generic [ref=e150]: ^
+                  - generic [ref=e151]: ^
+                  - generic [ref=e152]: ^
+                  - generic [ref=e153]: ^
+                  - generic [ref=e154]: ^
+                  - generic [ref=e155]: ^
+                  - generic [ref=e156]: ^
+                  - generic [ref=e157]: ^
+                  - generic [ref=e158]: ^
+                  - generic [ref=e159]: ^
+                  - generic [ref=e160]: ^
+                  - generic [ref=e161]: ^
+                  - generic [ref=e162]: ^
+                  - generic [ref=e163]: ^
+                  - generic [ref=e164]: ^
+                  - generic [ref=e165]: ^
+                  - generic [ref=e166]: ^
+                  - generic [ref=e167]: ^
+                  - generic [ref=e168]: ^
+                  - generic [ref=e169]: ^
+                  - generic [ref=e170]: ^
+                  - generic [ref=e171]: ^
+                  - generic [ref=e172]: ^
+                  - generic [ref=e173]: ^
+                  - generic [ref=e174]: ^
+                  - generic [ref=e175]: ^
+                  - generic [ref=e176]: ^
+                  - generic [ref=e177]: ^
+                  - generic [ref=e178]: ^
+                  - generic [ref=e179]: ^
+                  - generic [ref=e180]: ^
+                  - generic [ref=e181]: ^
+                  - generic [ref=e182]: ^
+                  - generic [ref=e183]: ^
+                  - generic [ref=e184]: ^
+                  - generic [ref=e185]: ^
+                  - generic [ref=e186]: ^
+                  - generic [ref=e187]: ^
+                  - generic [ref=e188]: ^
+                  - generic [ref=e189]: ^
+                  - generic [ref=e190]: ^
+                  - generic [ref=e191]: ^
+                  - generic [ref=e192]: ^
+                  - generic [ref=e193]: ^
+                  - generic [ref=e195]: 30 |
+                  - generic [ref=e197]: import
+                  - generic [ref=e198]: "{"
+                  - generic [ref=e199]: SearchResultsSkeleton
+                  - generic [ref=e200]: "}"
+                  - generic [ref=e201]: from
+                  - generic [ref=e203]: "'@/components/ui/skeleton'"
+                  - generic [ref=e204]: ;
+                  - generic [ref=e206]: 31 |
+                  - generic [ref=e208]: // Use API route to avoid server action cross-origin issues on App Hosting
+                  - generic [ref=e210]: 32 |
+                  - generic [ref=e211]: The export getAppCheck was not found in module [project]/node_modules/firebase/app-check/dist/esm/index.esm.js [app-client] (ecmascript) <exports>. Did you mean to import initializeAppCheck? All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+            - generic [ref=e212]:
+              - generic [ref=e213]: "1"
+              - generic [ref=e214]: "2"
+        - contentinfo [ref=e215]:
+          - paragraph [ref=e216]: This error occurred during the build process and can only be dismissed by fixing the error.
+```

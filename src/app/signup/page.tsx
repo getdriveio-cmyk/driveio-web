@@ -23,44 +23,105 @@ import type { AuthUser } from '@/lib/store';
 import { getUserByEmail, addUser } from '@/lib/firestore';
 import type { User } from '@/lib/types';
 
-const initialState = {
-  message: '',
-  error: '',
-  user: null,
-  success: false,
-};
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
+function SubmitButton({ loading }: { loading: boolean }) {
   return (
-    <Button type="submit" className="w-full" disabled={pending}>
-      {pending ? 'Creating Account...' : 'Create Account'}
+    <Button type="submit" className="w-full" disabled={loading}>
+      {loading ? 'Creating Account...' : 'Create Account'}
     </Button>
   );
 }
 
 export default function SignupPage() {
   const { toast } = useToast();
-  const [state, formAction] = useActionState(signupAction, initialState);
   const router = useRouter();
   const login = useAuth.getState().login;
   const formRef = useRef<HTMLFormElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (state?.success && state?.user) {
+  const handleEmailSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const name = formData.get('name') as string;
+    const isHost = formData.get('isHost') === 'on';
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Update profile with name
+      await updateProfile(user, { displayName: name });
+      
+      // Create server session
+      const idToken = await user.getIdToken(true);
+      const sessionResult = await createSessionFromIdToken(idToken);
+      
+      if (!sessionResult.success) {
+        console.warn('Failed to create server session');
+      }
+      
+      // Create user profile in Firestore
+      const newUser: User = {
+        id: user.uid,
+        email: user.email!,
+        name: name,
+        avatarUrl: user.photoURL || `https://picsum.photos/seed/${user.email}/40/40`,
+        isHost: isHost,
+        isAdmin: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      
+      await addUser(newUser);
+
+      const authUser: AuthUser = {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        avatarUrl: newUser.avatarUrl,
+        isHost: newUser.isHost,
+        isAdmin: newUser.isAdmin,
+      };
+
+      login(authUser);
       toast({
         title: 'Account Created!',
-        description: state.message,
+        description: `Welcome to DriveIO, ${authUser.name}!`,
       });
-      login(state.user);
       formRef.current?.reset();
-      if (state.user.isHost) {
+      
+      if (authUser.isHost) {
         router.push('/host/listings/start');
       } else {
         router.push('/profile');
       }
+    } catch (error: any) {
+      let errorMessage = 'An unexpected error occurred.';
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'An account with this email already exists.';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'Password should be at least 6 characters.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Please enter a valid email address.';
+          break;
+        default:
+          console.error('Firebase Signup Error:', error);
+          errorMessage = 'Failed to create account. Please try again later.';
+          break;
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
-  }, [state, toast, router, login]);
+  };
 
   const handleSocialLogin = async (providerName: 'google' | 'apple') => {
     try {
@@ -128,17 +189,17 @@ export default function SignupPage() {
           <CardDescription>Join DriveIO to start your journey. You will be logged in automatically after signing up.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form ref={formRef} action={formAction} className="grid gap-4">
-             {state?.error && (
+          <form ref={formRef} onSubmit={handleEmailSignup} className="grid gap-4">
+             {error && (
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Signup Failed</AlertTitle>
-                <AlertDescription>{state.error}</AlertDescription>
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             <div className="grid gap-2">
-              <Label htmlFor="full-name">Full Name</Label>
-              <Input id="full-name" name="fullName" placeholder="John Doe" required />
+              <Label htmlFor="name">Full Name</Label>
+              <Input id="name" name="name" placeholder="John Doe" required />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
@@ -150,13 +211,13 @@ export default function SignupPage() {
             </div>
             
             <div className="flex items-center space-x-2">
-                <Checkbox id="is-host" name="isHost" />
-                <Label htmlFor="is-host" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <Checkbox id="isHost" name="isHost" />
+                <Label htmlFor="isHost" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     I also want to list my car as a host
                 </Label>
             </div>
 
-            <SubmitButton />
+            <SubmitButton loading={loading} />
           </form>
             
           <Separator className="my-4" />

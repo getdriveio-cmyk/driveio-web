@@ -1,0 +1,126 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - link [ref=e6] [cursor=pointer]:
+            - /url: /
+            - img [ref=e7] [cursor=pointer]:
+              - generic [ref=e8] [cursor=pointer]: DriveIO
+          - navigation [ref=e9]:
+            - navigation "Main" [ref=e10]:
+              - list [ref=e12]:
+                - listitem [ref=e13]:
+                  - link "Find a car" [ref=e14] [cursor=pointer]:
+                    - /url: /search
+                - listitem [ref=e15]:
+                  - link "Become a host" [ref=e16] [cursor=pointer]:
+                    - /url: /host
+        - generic [ref=e17]:
+          - link "Log In" [ref=e18] [cursor=pointer]:
+            - /url: /login
+          - link "Sign Up" [ref=e19] [cursor=pointer]:
+            - /url: /signup
+    - main [ref=e20]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - heading "Welcome Back" [level=3] [ref=e24]
+          - generic [ref=e25]: Enter your credentials to access your account
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]:
+              - generic [ref=e29]: Email
+              - textbox "Email" [ref=e30]
+            - generic [ref=e31]:
+              - generic [ref=e32]:
+                - generic [ref=e33]: Password
+                - link "Forgot your password?" [ref=e34] [cursor=pointer]:
+                  - /url: /forgot-password
+              - textbox "Password" [ref=e35]
+            - button "Log in" [ref=e36] [cursor=pointer]
+          - generic [ref=e37]:
+            - button "Sign in with Google" [ref=e38] [cursor=pointer]:
+              - img
+              - generic [ref=e39] [cursor=pointer]: Google
+            - button "Sign in with Apple" [ref=e40] [cursor=pointer]:
+              - img
+              - generic [ref=e41] [cursor=pointer]: Apple
+          - generic [ref=e42]:
+            - text: Don't have an account?
+            - link "Sign up" [ref=e43] [cursor=pointer]:
+              - /url: /signup
+    - contentinfo [ref=e44]:
+      - generic [ref=e45]:
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - img [ref=e48]:
+              - generic [ref=e49]: DriveIO
+            - paragraph [ref=e50]: Your journey, your car. Seamless rentals at your fingertips.
+            - generic [ref=e51]:
+              - link [ref=e52] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e53] [cursor=pointer]
+              - link [ref=e55] [cursor=pointer]:
+                - /url: https://x.com/GetDriveIO
+                - img [ref=e56] [cursor=pointer]
+              - link [ref=e58] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e59] [cursor=pointer]
+          - generic [ref=e62]:
+            - heading "Explore" [level=3] [ref=e63]
+            - list [ref=e64]:
+              - listitem [ref=e65]:
+                - link "About Us" [ref=e66] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e67]:
+                - link "Careers" [ref=e68] [cursor=pointer]:
+                  - /url: /careers
+              - listitem [ref=e69]:
+                - link "Press" [ref=e70] [cursor=pointer]:
+                  - /url: /press
+          - generic [ref=e71]:
+            - heading "Hosting" [level=3] [ref=e72]
+            - list [ref=e73]:
+              - listitem [ref=e74]:
+                - link "List Your Car" [ref=e75] [cursor=pointer]:
+                  - /url: /host
+              - listitem [ref=e76]:
+                - link "Host Guidelines" [ref=e77] [cursor=pointer]:
+                  - /url: /hosting/guidelines
+              - listitem [ref=e78]:
+                - link "Insurance & Protection" [ref=e79] [cursor=pointer]:
+                  - /url: /hosting/insurance
+          - generic [ref=e80]:
+            - heading "Support" [level=3] [ref=e81]
+            - list [ref=e82]:
+              - listitem [ref=e83]:
+                - link "Help Center" [ref=e84] [cursor=pointer]:
+                  - /url: /help-center
+              - listitem [ref=e85]:
+                - link "Contact Us" [ref=e86] [cursor=pointer]:
+                  - /url: /contact
+              - listitem [ref=e87]:
+                - link "Terms of Service" [ref=e88] [cursor=pointer]:
+                  - /url: /terms-of-service
+              - listitem [ref=e89]:
+                - link "Privacy Policy" [ref=e90] [cursor=pointer]:
+                  - /url: /privacy-policy
+        - paragraph [ref=e92]: © 2025 DriveIO, Inc. All rights reserved.
+  - region "Notifications (F8)":
+    - list
+  - generic [ref=e94]:
+    - paragraph [ref=e95]:
+      - text: We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
+      - link "Learn more" [ref=e96] [cursor=pointer]:
+        - /url: /privacy-policy
+      - text: .
+    - generic [ref=e97]:
+      - button "Decline" [ref=e98] [cursor=pointer]
+      - button "Accept" [ref=e99] [cursor=pointer]
+  - alert [ref=e100]
+  - button "Open Next.js Dev Tools" [ref=e106] [cursor=pointer]:
+    - img [ref=e107] [cursor=pointer]
+```
