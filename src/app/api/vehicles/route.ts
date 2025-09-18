@@ -20,8 +20,8 @@ export async function GET(req: NextRequest) {
     
     // Try to use real Firestore data, fallback to mock data
     try {
-      const vehicles = await getVehiclesAdmin(Number.isFinite(count as number) ? (count as number) : undefined);
-      return NextResponse.json({ vehicles });
+      const firestoreVehicles = await getVehiclesAdmin(Number.isFinite(count as number) ? (count as number) : undefined);
+      return NextResponse.json({ vehicles: firestoreVehicles });
     } catch (firestoreError) {
       console.warn('Firestore unavailable, using mock data:', firestoreError);
       // Fallback to mock data if Firestore fails

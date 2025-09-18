@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
     
     // Try to use real Firestore data, fallback to mock data
     try {
-      const vehicles = await getVehiclesAdmin(typeof count === 'number' ? count : undefined, filters);
-      return NextResponse.json({ vehicles });
+      const firestoreVehicles = await getVehiclesAdmin(typeof count === 'number' ? count : undefined, filters);
+      return NextResponse.json({ vehicles: firestoreVehicles });
     } catch (firestoreError) {
       console.warn('Firestore unavailable, using mock data:', firestoreError);
       // Fallback to mock data with filtering
